@@ -1,0 +1,20 @@
+{
+  "cluster": "Harbor-Production",
+  "drsEnabled": true,
+  "affinityRules": [
+    {
+      "name": "Web-Tier-Anti-Affinity",
+      "type": "VmAntiAffinityRule",
+      "enabled": true,
+      "mandatory": true,
+      "vms": ["WEB01", "WEB02"]
+    },
+    {
+      "name": "App-Tier-Anti-Affinity",
+      "type": "VmAntiAffinityRule",
+      "enabled": true,
+      "mandatory": true,
+      "vms": ["APP01", "APP02"]
+    }
+  ]
+}

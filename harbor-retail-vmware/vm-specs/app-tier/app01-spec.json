@@ -1,0 +1,145 @@
+{
+  "vmName": "HARBOR-APP01",
+  "description": "Harbor Retail primary application server running backend API services",
+  "environment": "production",
+  "tier": "app-tier",
+  "hardware": {
+    "cpu": {
+      "vCPUs": 8,
+      "coresPerSocket": 4,
+      "sockets": 2,
+      "cpuReservationMHz": 8000,
+      "cpuLimitMHz": 16000
+    },
+    "memory": {
+      "sizeGB": 16,
+      "reservationGB": 8,
+      "limitGB": 16
+    },
+    "storage": {
+      "disks": [
+        {
+          "label": "Hard disk 1",
+          "sizeGB": 200,
+          "type": "thin",
+          "datastore": "vsanDatastore",
+          "controller": "SCSI controller 0",
+          "unitNumber": 0,
+          "purpose": "OS and application binaries"
+        }
+      ],
+      "totalStorageGB": 200
+    }
+  },
+  "guestOS": {
+    "osFamily": "Windows",
+    "osFullName": "Microsoft Windows Server 2019 Standard",
+    "osVersion": "10.0.17763",
+    "osEdition": "Standard",
+    "licenseType": "Volume",
+    "hostname": "HARBOR-APP01",
+    "domain": "harbor.local",
+    "timeZone": "Pacific Standard Time",
+    "locale": "en-US"
+  },
+  "network": {
+    "interfaces": [
+      {
+        "label": "Network adapter 1",
+        "networkName": "VLAN-App-20",
+        "adapterType": "VMXNET3",
+        "macAddress": "00:50:56:a1:02:01",
+        "ipAddress": "10.10.20.11",
+        "subnetMask": "255.255.255.0",
+        "defaultGateway": "10.10.20.1",
+        "dnsServers": ["10.10.1.10", "10.10.1.11"],
+        "connected": true,
+        "startConnected": true
+      }
+    ],
+    "firewallRules": [
+      { "port": 8443, "protocol": "TCP", "direction": "inbound", "description": "API HTTPS endpoint" },
+      { "port": 8080, "protocol": "TCP", "direction": "inbound", "description": "API HTTP endpoint" },
+      { "port": 443, "protocol": "TCP", "direction": "outbound", "description": "Outbound HTTPS" },
+      { "port": 1433, "protocol": "TCP", "direction": "outbound", "description": "SQL Server connectivity" },
+      { "port": 3389, "protocol": "TCP", "direction": "inbound", "description": "RDP (restricted)" }
+    ]
+  },
+  "vmwareTools": {
+    "installed": true,
+    "version": "12.1.5",
+    "status": "guestToolsRunning",
+    "autoUpgrade": true,
+    "syncTimeWithHost": true
+  },
+  "softwareStack": {
+    "roles": ["Application-Server"],
+    "features": [
+      "NET-Framework-45-Core",
+      "NET-Framework-45-ASPNET",
+      "NET-WCF-Services45"
+    ],
+    "applications": [
+      {
+        "name": "Harbor Retail API Server",
+        "version": "3.5.2",
+        "role": "Backend REST API for inventory, orders, and customer management",
+        "framework": ".NET Framework 4.8",
+        "endpoints": [
+          { "path": "/api/v2/inventory", "port": 8443, "protocol": "HTTPS" },
+          { "path": "/api/v2/orders", "port": 8443, "protocol": "HTTPS" },
+          { "path": "/api/v2/customers", "port": 8443, "protocol": "HTTPS" },
+          { "path": "/health", "port": 8080, "protocol": "HTTP" }
+        ],
+        "serviceName": "HarborRetailAPIService",
+        "serviceAccount": "harbor\\svc-api",
+        "startupType": "Automatic",
+        "installPath": "D:\\HarborRetail\\APIServer"
+      },
+      {
+        "name": ".NET Framework",
+        "version": "4.8"
+      },
+      {
+        "name": "Java Runtime Environment",
+        "version": "11.0.18",
+        "purpose": "Third-party integration middleware"
+      }
+    ]
+  },
+  "performanceBaseline": {
+    "collectionPeriod": "30-day average",
+    "cpu": {
+      "avgUsagePercent": 42,
+      "peakUsagePercent": 78,
+      "readyTimeMsPerSec": 1.8
+    },
+    "memory": {
+      "avgUsagePercent": 62,
+      "peakUsagePercent": 85,
+      "activeGB": 9.9,
+      "balloonedMB": 0,
+      "swappedMB": 0
+    },
+    "storage": {
+      "avgReadIOPS": 250,
+      "avgWriteIOPS": 150,
+      "peakReadIOPS": 800,
+      "peakWriteIOPS": 500,
+      "avgLatencyMs": 3.2
+    },
+    "network": {
+      "avgThroughputMbps": 25,
+      "peakThroughputMbps": 120,
+      "avgPacketsPerSec": 4500
+    }
+  },
+  "tags": {
+    "application": "Harbor Retail",
+    "tier": "app",
+    "environment": "production",
+    "criticality": "high",
+    "backupPolicy": "daily",
+    "owner": "harbor-retail-team"
+  }
+}

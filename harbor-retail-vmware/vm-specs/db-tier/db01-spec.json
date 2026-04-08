@@ -1,0 +1,186 @@
+{
+  "vmName": "HARBOR-DB01",
+  "description": "Harbor Retail primary database server running SQL Server 2019 for all retail data",
+  "environment": "production",
+  "tier": "db-tier",
+  "hardware": {
+    "cpu": {
+      "vCPUs": 16,
+      "coresPerSocket": 8,
+      "sockets": 2,
+      "cpuReservationMHz": 16000,
+      "cpuLimitMHz": 32000
+    },
+    "memory": {
+      "sizeGB": 64,
+      "reservationGB": 48,
+      "limitGB": 64
+    },
+    "storage": {
+      "disks": [
+        {
+          "label": "Hard disk 1",
+          "sizeGB": 200,
+          "type": "thick-eager-zeroed",
+          "datastore": "vsanDatastore",
+          "controller": "SCSI controller 0",
+          "unitNumber": 0,
+          "purpose": "OS and SQL Server binaries"
+        },
+        {
+          "label": "Hard disk 2",
+          "sizeGB": 500,
+          "type": "thick-eager-zeroed",
+          "datastore": "vsanDatastore-SSD",
+          "controller": "SCSI controller 1",
+          "unitNumber": 0,
+          "purpose": "SQL Server data files, log files, and TempDB"
+        }
+      ],
+      "totalStorageGB": 700
+    }
+  },
+  "guestOS": {
+    "osFamily": "Windows",
+    "osFullName": "Microsoft Windows Server 2019 Standard",
+    "osVersion": "10.0.17763",
+    "osEdition": "Standard",
+    "licenseType": "Volume",
+    "hostname": "HARBOR-DB01",
+    "domain": "harbor.local",
+    "timeZone": "Pacific Standard Time",
+    "locale": "en-US"
+  },
+  "network": {
+    "interfaces": [
+      {
+        "label": "Network adapter 1",
+        "networkName": "VLAN-DB-30",
+        "adapterType": "VMXNET3",
+        "macAddress": "00:50:56:a1:03:01",
+        "ipAddress": "10.10.30.11",
+        "subnetMask": "255.255.255.0",
+        "defaultGateway": "10.10.30.1",
+        "dnsServers": ["10.10.1.10", "10.10.1.11"],
+        "connected": true,
+        "startConnected": true
+      }
+    ],
+    "firewallRules": [
+      { "port": 1433, "protocol": "TCP", "direction": "inbound", "description": "SQL Server default instance" },
+      { "port": 1434, "protocol": "UDP", "direction": "inbound", "description": "SQL Server Browser" },
+      { "port": 5022, "protocol": "TCP", "direction": "inbound", "description": "SQL Server Always On endpoint" },
+      { "port": 3389, "protocol": "TCP", "direction": "inbound", "description": "RDP (restricted)" }
+    ]
+  },
+  "vmwareTools": {
+    "installed": true,
+    "version": "12.1.5",
+    "status": "guestToolsRunning",
+    "autoUpgrade": true,
+    "syncTimeWithHost": true
+  },
+  "softwareStack": {
+    "roles": ["Database-Server"],
+    "features": [
+      "NET-Framework-45-Core",
+      "NET-Framework-45-ASPNET"
+    ],
+    "applications": [
+      {
+        "name": "Microsoft SQL Server 2019",
+        "version": "15.0.4316.3",
+        "edition": "Enterprise",
+        "serviceAccount": "harbor\\svc-sql",
+        "instanceName": "MSSQLSERVER",
+        "port": 1433,
+        "collation": "SQL_Latin1_General_CP1_CI_AS",
+        "maxMemoryMB": 51200,
+        "minMemoryMB": 8192,
+        "maxDOP": 8,
+        "costThresholdForParallelism": 50,
+        "databases": [
+          {
+            "name": "HarborRetail",
+            "sizeMB": 85000,
+            "dataFilePath": "E:\\SQLData\\HarborRetail.mdf",
+            "logFilePath": "E:\\SQLLogs\\HarborRetail_log.ldf",
+            "recoveryModel": "Full",
+            "compatibilityLevel": 150
+          },
+          {
+            "name": "HarborRetail_Archive",
+            "sizeMB": 120000,
+            "dataFilePath": "E:\\SQLData\\HarborRetail_Archive.mdf",
+            "logFilePath": "E:\\SQLLogs\\HarborRetail_Archive_log.ldf",
+            "recoveryModel": "Simple",
+            "compatibilityLevel": 150
+          },
+          {
+            "name": "HarborRetail_Staging",
+            "sizeMB": 15000,
+            "dataFilePath": "E:\\SQLData\\HarborRetail_Staging.mdf",
+            "logFilePath": "E:\\SQLLogs\\HarborRetail_Staging_log.ldf",
+            "recoveryModel": "Simple",
+            "compatibilityLevel": 150
+          }
+        ],
+        "backupSchedule": {
+          "full": "Daily at 02:00 AM",
+          "differential": "Every 6 hours",
+          "transactionLog": "Every 15 minutes"
+        },
+        "maintenancePlan": {
+          "indexRebuild": "Weekly Sunday 01:00 AM",
+          "statisticsUpdate": "Daily 03:00 AM",
+          "integrityCheck": "Weekly Saturday 23:00 PM"
+        }
+      },
+      {
+        "name": "SQL Server Management Studio",
+        "version": "19.1"
+      },
+      {
+        "name": "SQL Server Agent",
+        "status": "Running",
+        "serviceAccount": "harbor\\svc-sqlagent",
+        "startupType": "Automatic"
+      }
+    ]
+  },
+  "performanceBaseline": {
+    "collectionPeriod": "30-day average",
+    "cpu": {
+      "avgUsagePercent": 48,
+      "peakUsagePercent": 88,
+      "readyTimeMsPerSec": 2.5
+    },
+    "memory": {
+      "avgUsagePercent": 82,
+      "peakUsagePercent": 94,
+      "activeGB": 52.5,
+      "balloonedMB": 0,
+      "swappedMB": 0
+    },
+    "storage": {
+      "avgReadIOPS": 1800,
+      "avgWriteIOPS": 950,
+      "peakReadIOPS": 5500,
+      "peakWriteIOPS": 3200,
+      "avgLatencyMs": 1.8
+    },
+    "network": {
+      "avgThroughputMbps": 45,
+      "peakThroughputMbps": 200,
+      "avgPacketsPerSec": 8500
+    }
+  },
+  "tags": {
+    "application": "Harbor Retail",
+    "tier": "database",
+    "environment": "production",
+    "criticality": "critical",
+    "backupPolicy": "full-daily-log-15min",
+    "owner": "harbor-retail-team"
+  }
+}

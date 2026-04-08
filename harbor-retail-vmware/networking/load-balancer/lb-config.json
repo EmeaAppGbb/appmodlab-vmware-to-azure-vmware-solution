@@ -1,0 +1,24 @@
+{
+  "version": "NSX-V 6.4.10",
+  "virtualServers": [
+    {
+      "name": "Web-VIP",
+      "ipAddress": "192.168.1.100",
+      "protocol": "HTTPS",
+      "port": 443,
+      "algorithm": "round-robin",
+      "poolMembers": [
+        {"name": "WEB01", "ipAddress": "10.10.10.11", "port": 443},
+        {"name": "WEB02", "ipAddress": "10.10.10.12", "port": 443}
+      ],
+      "healthCheck": {
+        "protocol": "HTTPS",
+        "port": 443,
+        "url": "/health",
+        "interval": 5,
+        "timeout": 15,
+        "maxRetries": 3
+      }
+    }
+  ]
+}

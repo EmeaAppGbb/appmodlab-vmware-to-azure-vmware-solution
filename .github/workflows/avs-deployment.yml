@@ -1,0 +1,221 @@
+name: AVS Deployment and Validation
+
+on:
+  push:
+    branches: [main, solution]
+    paths:
+      - 'avs-deployment/**'
+      - '.github/workflows/**'
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        default: 'dev'
+        type: choice
+        options:
+          - dev
+          - test
+          - prod
+
+env:
+  TERRAFORM_VERSION: '1.6.0'
+  AZURE_REGION: 'eastus'
+
+jobs:
+  validate-terraform:
+    name: Validate Terraform Configuration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Format Check
+        run: |
+          cd avs-deployment/terraform
+          terraform fmt -check -recursive
+
+      - name: Terraform Init
+        run: |
+          cd avs-deployment/terraform
+          terraform init -backend=false
+
+      - name: Terraform Validate
+        run: |
+          cd avs-deployment/terraform
+          terraform validate
+
+  validate-bicep:
+    name: Validate Bicep Templates
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Validate Bicep
+        run: |
+          az bicep build --file avs-deployment/bicep/avs-deployment.bicep
+          echo "Bicep validation successful"
+
+  test-powercli-scripts:
+    name: Test PowerCLI Scripts
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install PowerCLI
+        shell: powershell
+        run: |
+          Install-Module -Name VMware.PowerCLI -Force -Scope CurrentUser -AllowClobber
+          Set-PowerCLIConfiguration -InvalidCertificateAction Ignore -Confirm:$false
+
+      - name: Test Export Inventory Script
+        shell: powershell
+        run: |
+          # Syntax validation only (no actual vCenter connection)
+          $null = $PSScriptRoot
+          Get-Command -Name .\harbor-retail-vmware\scripts\powercli\export-inventory.ps1 -Syntax
+
+      - name: Test Assessment Script
+        shell: powershell
+        run: |
+          Get-Command -Name .\harbor-retail-vmware\scripts\powercli\assess-compatibility.ps1 -Syntax
+
+      - name: Test Migration Runbook Script
+        shell: powershell
+        run: |
+          Get-Command -Name .\harbor-retail-vmware\scripts\powercli\migration-runbook.ps1 -Syntax
+
+  deploy-avs-dev:
+    name: Deploy AVS (Dev Environment)
+    needs: [validate-terraform, validate-bicep]
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' && github.event.inputs.environment == 'dev'
+    environment: dev
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: ${{ env.TERRAFORM_VERSION }}
+
+      - name: Terraform Init
+        run: |
+          cd avs-deployment/terraform
+          terraform init
+
+      - name: Terraform Plan
+        run: |
+          cd avs-deployment/terraform
+          terraform plan \
+            -var="resource_group_name=Harbor-AVS-Dev-RG" \
+            -var="avs_cluster_name=Harbor-AVS-Dev" \
+            -var="location=${{ env.AZURE_REGION }}" \
+            -out=tfplan
+
+      - name: Terraform Apply
+        run: |
+          cd avs-deployment/terraform
+          terraform apply -auto-approve tfplan
+
+      - name: Output AVS Details
+        run: |
+          cd avs-deployment/terraform
+          terraform output -json > avs-outputs.json
+          cat avs-outputs.json
+
+  post-migration-validation:
+    name: Post-Migration Validation Tests
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/solution'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+      - name: Check AVS Cluster Health
+        run: |
+          CLUSTER_STATE=$(az vmware private-cloud show \
+            --resource-group Harbor-AVS-RG \
+            --name Harbor-AVS-PrivateCloud \
+            --query provisioningState -o tsv)
+          
+          if [ "$CLUSTER_STATE" != "Succeeded" ]; then
+            echo "AVS cluster not healthy: $CLUSTER_STATE"
+            exit 1
+          fi
+          
+          echo "AVS cluster health: OK"
+
+      - name: Verify NSX-T Segments
+        run: |
+          SEGMENTS=$(az vmware workload-network segment list \
+            --resource-group Harbor-AVS-RG \
+            --private-cloud Harbor-AVS-PrivateCloud \
+            --query '[].name' -o tsv)
+          
+          echo "NSX-T Segments: $SEGMENTS"
+          
+          # Check for required segments
+          for segment in "Web-Segment" "App-Segment" "DB-Segment"; do
+            if echo "$SEGMENTS" | grep -q "$segment"; then
+              echo "✓ $segment found"
+            else
+              echo "✗ $segment missing"
+              exit 1
+            fi
+          done
+
+      - name: Check ExpressRoute Connection
+        run: |
+          CONNECTION_STATE=$(az network vpn-connection show \
+            --resource-group Harbor-AVS-RG \
+            --name Harbor-AVS-ER-Connection \
+            --query connectionStatus -o tsv 2>/dev/null || echo "NotFound")
+          
+          echo "ExpressRoute connection status: $CONNECTION_STATE"
+
+  security-scan:
+    name: Security Scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run Checkov (IaC Security)
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: avs-deployment/
+          framework: terraform,bicep
+          soft_fail: true
+
+      - name: Scan for Secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: ${{ github.event.repository.default_branch }}
+          head: HEAD

@@ -1,16 +1,36 @@
-# General
-*.log
-*.tmp
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terraform.lock.hcl
+
+# Bicep
+*.bicep.parameters.json
+
+# PowerShell
+*.ps1.swp
+*.psm1.swp
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.user
+
+# OS
 .DS_Store
 Thumbs.db
 
-# IDEs
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Logs
+*.log
 
-# Dependencies
-node_modules/
-vendor/
+# Sensitive
+secrets.json
+*.pfx
+*.key
+*.pem
+
+# Outputs
+exports/
+reports/

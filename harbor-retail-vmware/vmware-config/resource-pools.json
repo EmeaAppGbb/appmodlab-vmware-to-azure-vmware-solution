@@ -1,0 +1,23 @@
+{
+  "cluster": "Harbor-Production",
+  "resourcePools": [
+    {
+      "name": "Web-Pool",
+      "cpuShares": "normal",
+      "cpuReservationMhz": 4000,
+      "memoryReservationMB": 16384
+    },
+    {
+      "name": "App-Pool",
+      "cpuShares": "high",
+      "cpuReservationMhz": 8000,
+      "memoryReservationMB": 32768
+    },
+    {
+      "name": "DB-Pool",
+      "cpuShares": "high",
+      "cpuReservationMhz": 16000,
+      "memoryReservationMB": 65536
+    }
+  ]
+}

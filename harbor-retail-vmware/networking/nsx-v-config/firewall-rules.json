@@ -1,0 +1,34 @@
+{
+  "version": "NSX-V 6.4.10",
+  "sections": [
+    {
+      "name": "Harbor-Retail-Microsegmentation",
+      "rules": [
+        {
+          "id": 1001,
+          "name": "Allow-Web-to-App",
+          "source": ["Web-Segment"],
+          "destination": ["App-Segment"],
+          "service": ["HTTPS", "HTTP"],
+          "action": "ALLOW"
+        },
+        {
+          "id": 1002,
+          "name": "Allow-App-to-DB",
+          "source": ["App-Segment"],
+          "destination": ["DB-Segment"],
+          "service": ["MS-SQL-S"],
+          "action": "ALLOW"
+        },
+        {
+          "id": 1003,
+          "name": "Block-Web-to-DB",
+          "source": ["Web-Segment"],
+          "destination": ["DB-Segment"],
+          "service": ["ANY"],
+          "action": "DROP"
+        }
+      ]
+    }
+  ]
+}

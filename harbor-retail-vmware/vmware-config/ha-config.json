@@ -1,0 +1,7 @@
+{
+  "cluster": "Harbor-Production",
+  "haEnabled": true,
+  "haAdmissionControlEnabled": true,
+  "vmMonitoring": "vmMonitoringOnly",
+  "hostMonitoring": "enabled"
+}

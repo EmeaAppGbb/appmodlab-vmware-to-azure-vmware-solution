@@ -1,0 +1,11 @@
+{
+  "zone": "harbor.local",
+  "aRecords": [
+    {"hostname": "web01", "ipAddress": "10.10.10.11"},
+    {"hostname": "web02", "ipAddress": "10.10.10.12"},
+    {"hostname": "app01", "ipAddress": "10.10.20.11"},
+    {"hostname": "app02", "ipAddress": "10.10.20.12"},
+    {"hostname": "db01", "ipAddress": "10.10.30.11"},
+    {"hostname": "portal", "ipAddress": "192.168.1.100", "description": "Load balancer VIP"}
+  ]
+}

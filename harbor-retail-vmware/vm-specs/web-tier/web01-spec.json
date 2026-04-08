@@ -1,0 +1,150 @@
+{
+  "vmName": "HARBOR-WEB01",
+  "description": "Harbor Retail primary web server hosting customer-facing IIS applications",
+  "environment": "production",
+  "tier": "web-tier",
+  "hardware": {
+    "cpu": {
+      "vCPUs": 4,
+      "coresPerSocket": 2,
+      "sockets": 2,
+      "cpuReservationMHz": 4000,
+      "cpuLimitMHz": 8000
+    },
+    "memory": {
+      "sizeGB": 8,
+      "reservationGB": 4,
+      "limitGB": 8
+    },
+    "storage": {
+      "disks": [
+        {
+          "label": "Hard disk 1",
+          "sizeGB": 100,
+          "type": "thin",
+          "datastore": "vsanDatastore",
+          "controller": "SCSI controller 0",
+          "unitNumber": 0,
+          "purpose": "OS and application binaries"
+        }
+      ],
+      "totalStorageGB": 100
+    }
+  },
+  "guestOS": {
+    "osFamily": "Windows",
+    "osFullName": "Microsoft Windows Server 2019 Standard",
+    "osVersion": "10.0.17763",
+    "osEdition": "Standard",
+    "licenseType": "Volume",
+    "hostname": "HARBOR-WEB01",
+    "domain": "harbor.local",
+    "timeZone": "Pacific Standard Time",
+    "locale": "en-US"
+  },
+  "network": {
+    "interfaces": [
+      {
+        "label": "Network adapter 1",
+        "networkName": "VLAN-Web-10",
+        "adapterType": "VMXNET3",
+        "macAddress": "00:50:56:a1:01:01",
+        "ipAddress": "10.10.10.11",
+        "subnetMask": "255.255.255.0",
+        "defaultGateway": "10.10.10.1",
+        "dnsServers": ["10.10.1.10", "10.10.1.11"],
+        "connected": true,
+        "startConnected": true
+      }
+    ],
+    "firewallRules": [
+      { "port": 80, "protocol": "TCP", "direction": "inbound", "description": "HTTP" },
+      { "port": 443, "protocol": "TCP", "direction": "inbound", "description": "HTTPS" },
+      { "port": 3389, "protocol": "TCP", "direction": "inbound", "description": "RDP (restricted)" }
+    ]
+  },
+  "vmwareTools": {
+    "installed": true,
+    "version": "12.1.5",
+    "status": "guestToolsRunning",
+    "autoUpgrade": true,
+    "syncTimeWithHost": true
+  },
+  "softwareStack": {
+    "roles": ["Web-Server", "Web-WebServer"],
+    "features": [
+      "Web-Default-Doc",
+      "Web-Http-Errors",
+      "Web-Static-Content",
+      "Web-Http-Logging",
+      "Web-Stat-Compression",
+      "Web-Dyn-Compression",
+      "Web-Filtering",
+      "Web-Windows-Auth",
+      "Web-Net-Ext45",
+      "Web-Asp-Net45",
+      "Web-ISAPI-Ext",
+      "Web-ISAPI-Filter",
+      "Web-Mgmt-Console"
+    ],
+    "applications": [
+      {
+        "name": "Internet Information Services (IIS)",
+        "version": "10.0",
+        "role": "Web server hosting Harbor Retail storefront",
+        "sites": [
+          {
+            "siteName": "HarborRetailWeb",
+            "bindings": [
+              { "protocol": "https", "port": 443, "hostHeader": "www.harbor-retail.com" },
+              { "protocol": "http", "port": 80, "hostHeader": "www.harbor-retail.com" }
+            ],
+            "physicalPath": "D:\\inetpub\\HarborRetailWeb",
+            "appPool": "HarborRetailAppPool",
+            "appPoolRuntime": ".NET CLR v4.0",
+            "appPoolPipelineMode": "Integrated"
+          }
+        ]
+      },
+      {
+        "name": ".NET Framework",
+        "version": "4.8"
+      }
+    ]
+  },
+  "performanceBaseline": {
+    "collectionPeriod": "30-day average",
+    "cpu": {
+      "avgUsagePercent": 35,
+      "peakUsagePercent": 72,
+      "readyTimeMsPerSec": 1.2
+    },
+    "memory": {
+      "avgUsagePercent": 55,
+      "peakUsagePercent": 78,
+      "activeGB": 4.4,
+      "balloonedMB": 0,
+      "swappedMB": 0
+    },
+    "storage": {
+      "avgReadIOPS": 120,
+      "avgWriteIOPS": 45,
+      "peakReadIOPS": 350,
+      "peakWriteIOPS": 180,
+      "avgLatencyMs": 2.1
+    },
+    "network": {
+      "avgThroughputMbps": 15,
+      "peakThroughputMbps": 85,
+      "avgPacketsPerSec": 2200
+    }
+  },
+  "tags": {
+    "application": "Harbor Retail",
+    "tier": "web",
+    "environment": "production",
+    "criticality": "high",
+    "backupPolicy": "daily",
+    "owner": "harbor-retail-team"
+  }
+}

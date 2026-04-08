@@ -1,0 +1,49 @@
+{
+  "nsxVersion": "NSX-V 6.4.10",
+  "vdsVersion": "7.0.0",
+  "distributedSwitches": [
+    {
+      "name": "Harbor-VDS-01",
+      "version": "7.0.0",
+      "mtu": 1600,
+      "numPorts": 512,
+      "portGroups": [
+        {
+          "name": "Web-Segment",
+          "vlanId": 10,
+          "portBinding": "static"
+        },
+        {
+          "name": "App-Segment",
+          "vlanId": 20,
+          "portBinding": "static"
+        },
+        {
+          "name": "DB-Segment",
+          "vlanId": 30,
+          "portBinding": "static"
+        }
+      ]
+    }
+  ],
+  "logicalSwitches": [
+    {
+      "name": "LS-Web",
+      "vni": 5001,
+      "subnet": "10.10.10.0/24",
+      "gatewayIP": "10.10.10.1"
+    },
+    {
+      "name": "LS-App",
+      "vni": 5002,
+      "subnet": "10.10.20.0/24",
+      "gatewayIP": "10.10.20.1"
+    },
+    {
+      "name": "LS-DB",
+      "vni": 5003,
+      "subnet": "10.10.30.0/24",
+      "gatewayIP": "10.10.30.1"
+    }
+  ]
+}
