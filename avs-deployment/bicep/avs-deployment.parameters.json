@@ -1,0 +1,41 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "location": {
+      "value": "eastus"
+    },
+    "resourceGroupName": {
+      "value": "rg-harbor-retail-avs"
+    },
+    "avsPrivateCloudName": {
+      "value": "pc-harbor-retail"
+    },
+    "avsSku": {
+      "value": "av36"
+    },
+    "avsClusterSize": {
+      "value": 3
+    },
+    "avsManagementCidr": {
+      "value": "10.100.0.0/22"
+    },
+    "vnetAddressSpace": {
+      "value": "10.200.0.0/16"
+    },
+    "gatewaySubnetPrefix": {
+      "value": "10.200.0.0/24"
+    },
+    "expressRouteAuthKeyName": {
+      "value": "harbor-retail-auth-key"
+    },
+    "tags": {
+      "value": {
+        "project": "harbor-retail",
+        "environment": "production",
+        "workload": "avs-migration",
+        "managed_by": "bicep"
+      }
+    }
+  }
+}
