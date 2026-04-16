@@ -484,6 +484,95 @@ function Get-AVSCapacityRequirements {
     }
 }
 
+function Get-AVSNodeSizing {
+    <#
+    .SYNOPSIS
+        Calculates AVS node sizing from the vcenter-inventory.json totals.
+        Reads aggregate vCPU, memory, and storage from the VM inventory and
+        recommends the minimum node count for each supported AVS SKU.
+
+    .DESCRIPTION
+        Uses the per-VM CPU, memory, and provisioned storage values to compute
+        aggregate workload demand. For each AVS SKU (AV36, AV36P, AV52) it
+        determines the nodes required per resource dimension after applying
+        the HA reserve percentage. The AVS minimum cluster size is 3 nodes.
+
+    .PARAMETER VMs
+        Array of VM objects from vcenter-inventory.json, each with numCPU,
+        memorySizeMB, and provisionedSpaceGB properties.
+
+    .PARAMETER ReservedPercent
+        Percentage of node capacity reserved for HA failover (default 25).
+
+    .OUTPUTS
+        Ordered hashtable with per-SKU sizing results and a recommendation.
+
+    .EXAMPLE
+        $inventory = Get-Content .\vcenter-inventory.json | ConvertFrom-Json
+        Get-AVSNodeSizing -VMs $inventory.virtualMachines
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [array]$VMs,
+
+        [ValidateRange(0, 50)]
+        [int]$ReservedPercent = 25
+    )
+
+    $totalvCPUs     = ($VMs | Measure-Object -Property numCPU -Sum).Sum
+    $totalMemGB     = [math]::Round(($VMs | Measure-Object -Property memorySizeMB -Sum).Sum / 1024, 2)
+    $totalStorageGB = ($VMs | Measure-Object -Property provisionedSpaceGB -Sum).Sum
+    $totalStorageTB = [math]::Round($totalStorageGB / 1024, 2)
+
+    $usableMultiplier = (100 - $ReservedPercent) / 100
+    $skus = @("AV36", "AV36P", "AV52")
+    $perSKU = [ordered]@{}
+
+    foreach ($sku in $skus) {
+        $spec = Get-AVSNodeSpec -SKU $sku
+        $usableCores   = [math]::Floor($spec.Cores * $usableMultiplier)
+        $usableMemGB   = [math]::Floor($spec.MemoryGB * $usableMultiplier)
+        $usableStorTB  = [math]::Round($spec.StorageTB * $usableMultiplier, 2)
+
+        $nodesByCPU     = [math]::Max(3, [math]::Ceiling($totalvCPUs / $usableCores))
+        $nodesByMemory  = [math]::Max(3, [math]::Ceiling($totalMemGB / $usableMemGB))
+        $nodesByStorage = [math]::Max(3, [math]::Ceiling($totalStorageTB / $usableStorTB))
+        $nodesRequired  = [math]::Max($nodesByCPU, [math]::Max($nodesByMemory, $nodesByStorage))
+
+        $perSKU[$sku] = [ordered]@{
+            SKU              = $sku
+            Description      = $spec.Description
+            NodesRequired    = $nodesRequired
+            NodesByCPU       = $nodesByCPU
+            NodesByMemory    = $nodesByMemory
+            NodesByStorage   = $nodesByStorage
+            UsableCoresNode  = $usableCores
+            UsableMemGBNode  = $usableMemGB
+            UsableStorTBNode = $usableStorTB
+        }
+    }
+
+    # Recommend the cheapest SKU that meets demand at the minimum node count
+    $recommended = $skus | Sort-Object { $perSKU[$_].NodesRequired } | Select-Object -First 1
+
+    return [ordered]@{
+        WorkloadTotals = [ordered]@{
+            TotalvCPUs      = $totalvCPUs
+            TotalMemoryGB   = $totalMemGB
+            TotalStorageTB  = $totalStorageTB
+            TotalStorageGB  = $totalStorageGB
+            VMCount         = $VMs.Count
+        }
+        HAReservePercent  = $ReservedPercent
+        PerSKU            = $perSKU
+        Recommendation    = [ordered]@{
+            SKU           = $recommended
+            NodesRequired = $perSKU[$recommended].NodesRequired
+            Rationale     = "Minimum node count ($($perSKU[$recommended].NodesRequired)) meets workload demand of $totalvCPUs vCPUs, $totalMemGB GB RAM, $totalStorageTB TB storage with $ReservedPercent% HA reserve."
+        }
+    }
+}
+
 function Test-NSXCompatibility {
     <#
     .SYNOPSIS
