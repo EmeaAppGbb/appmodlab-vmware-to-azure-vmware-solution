@@ -1,0 +1,100 @@
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö 1 line read
+
+ÔùÅ List directory harbor-retail-vmware
+  Ôöö 6 files found
+
+ÔùÅ Read vcenter-inventory.json
+  Ôöé harbor-retail-vmware\vmware-config\vcenter-inventory.json
+  Ôöö 111 lines read
+
+ÔùÅ List directory harbor-retail-vmware\scripts\powercli
+  Ôöö 5 files found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L1:80 (80 lines read)
+
+ÔùÅ List directory harbor-retail-vmware\documentation
+  Ôöö 3 files found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L80:200 (121 lines read)
+
+ÔùÅ Read runbook.md
+  Ôöé harbor-retail-vmware\documentation\runbook.md
+  Ôöö L1:60 (60 lines read)
+
+ÔùÅ List directory harbor-retail-vmware\networking
+  Ôöö 5 files found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L200:320 (121 lines read)
+
+ÔùÅ Read dns-records.json
+  Ôöé harbor-retail-vmware\networking\dns-records.json
+  Ôöö 45 lines read
+
+ÔùÅ List directory harbor-retail-vmware\networking\load-balancer
+  Ôöö 1 file found
+
+ÔùÅ Read rollback-plan.md
+  Ôöé harbor-retail-vmware\documentation\rollback-plan.md
+  Ôöö L1:50 (50 lines read)
+
+ÔùÅ Read lb-config.json
+  Ôöé harbor-retail-vmware\networking\load-balancer\lb-config.json
+  Ôöö 24 lines read
+
+ÔùÅ List directory harbor-retail-vmware\application
+  Ôöö 3 files found
+
+Now I have full context. Let me create both files.
+
+ÔùÅ Create migration-waves.md +368
+  Ôöö harbor-retail-vmware\documentation\migration-waves.md
+
+ÔùÅ Create validate-pre-migration.ps1 +502
+  Ôöö harbor-retail-vmware\scripts\powercli\validate-pre-migration.ps1
+
+Now let me verify both files and commit:
+
+ÔùÅ Stage new files and check status (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git
+  Ôöé --no-pager diff --stat && git add
+  Ôöé harbor-retail-vmware/documentation/migration-waves.md
+  Ôöé harbor-retail-vmware/scripts/powercli/validate-pre-migration.ps1 && git
+  Ôöé --no-pager status --short
+  Ôöö 4 lines...
+
+ÔùÅ Commit both new files (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git
+  Ôöé commit -m "Add migration wave plan and pre-migration validation script
+  Ôöé
+  Ôöé - migration-waves.md: Three-wave plan (DBÔåÆAppÔåÆWeb) with per-wave
+  Ôöé checklists, durations, rollback criteria, success validation,ÔÇª
+  Ôöö 16 lines...
+
+Both files created and committed. Here's what was delivered:
+
+**1. `migration-waves.md`** ÔÇö Detailed 3-wave plan (DBÔåÆAppÔåÆWeb order):
+- **Wave 1 (DB01):** Bulk migration, SQL backup/quiesce steps, 2-hour window
+- **Wave 2 (APP01/APP02):** vMotion with anti-affinity DRS rule, 1.5-hour window
+- **Wave 3 (WEB01/WEB02):** Rolling vMotion with LB drain/cutover, 1-hour window
+- Each wave includes: pre-migration checklist, estimated duration, rollback criteria, success validation, and dependencies
+- Includes ASCII timeline diagram, communication plan, escalation contacts, and decommission schedule
+
+**2. `validate-pre-migration.ps1`** ÔÇö PowerCLI validation script:
+- **Common checks:** VMware Tools status, active snapshots, CD/DVD mounted, network to AVS, DNS resolution
+- **Tier-specific:** IIS `/health` (web), API `/health` (app), SQL TCP 1433 (DB)
+- Supports both **live** (vCenter) and **simulation** modes
+- Outputs color-coded console report + JSON file with pass/fail per VM
+- Returns exit code 0/1 for CI/CD integration
+
+
+Changes   +870 -0
+Requests  3 Premium (3m 34s)
+Tokens    Ôåæ 359.4k ÔÇó Ôåô 12.6k ÔÇó 318.3k (cached)
