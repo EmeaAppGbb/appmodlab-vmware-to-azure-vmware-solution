@@ -1,0 +1,103 @@
+ÔùÅ List directory .
+  Ôöö 9 files found
+
+ÔùÅ List directory avs-deployment
+  Ôöö 3 files found
+
+ÔùÅ List directory harbor-retail-vmware
+  Ôöö 6 files found
+
+ÔùÅ List directory harbor-retail-vmware\documentation
+  Ôöö 4 files found
+
+ÔùÅ List directory avs-deployment\scripts
+  Ôöö 5 files found
+
+ÔùÅ List directory avs-deployment\bicep
+  Ôöö 3 files found
+
+ÔùÅ Explore Explore existing file patterns
+  Ôöé Read migration-waves.md
+  Ôöé   Ôöé harbor-retail-vmware\documentation\migration-waves.md
+  Ôöé   Ôöö L1:80 (80 lines read)
+  Ôöö Read avs-deployment.parameters.json
+      Ôöé avs-deployment\bicep\avs-deployment.parameters.json
+      Ôöö 41 lines read
+
+Now let me check for any existing -Simulate patterns and read a couple key files more carefully.
+
+ÔùÅ Read avs-resources.bicep
+  Ôöé avs-deployment\bicep\avs-resources.bicep
+  Ôöö 146 lines read
+
+ÔùÅ Read configure-expressroute.ps1
+  Ôöé avs-deployment\scripts\configure-expressroute.ps1
+  Ôöö 331 lines read
+
+ÔùÅ Search (grep)
+  Ôöé "Simulate" (avs-deployment\scripts)
+  Ôöö 40 lines found
+
+Now let me also check the configure-backup.ps1 for the Simulate pattern:
+
+ÔùÅ Read configure-backup.ps1
+  Ôöé avs-deployment\scripts\configure-backup.ps1
+  Ôöö L1:50 (50 lines read)
+
+ÔùÅ Read migration-waves.md
+  Ôöé harbor-retail-vmware\documentation\migration-waves.md
+  Ôöö L1:50 (50 lines read)
+
+ÔùÅ Read avs-deployment.bicep
+  Ôöé avs-deployment\bicep\avs-deployment.bicep
+  Ôöö 88 lines read
+
+Now I have a thorough understanding of all the patterns. Let me create all three files. I'll start by creating them all in parallel.
+
+ÔùÅ Create azure-integration.bicep +454
+  Ôöö avs-deployment\bicep\azure-integration.bicep
+
+ÔùÅ Create azure-integration-guide.md +298
+  Ôöö harbor-retail-vmware\documentation\azure-integration-guide.md
+
+ÔùÅ Create configure-azure-services.ps1 +483
+  Ôöö avs-deployment\scripts\configure-azure-services.ps1
+
+Now let me verify the files and commit:
+
+ÔùÅ Check git status of new files (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git
+  Ôöé --no-pager diff --stat HEAD
+  Ôöö 1 line...
+
+ÔùÅ Check git status (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git status
+  Ôöé --short
+  Ôöö 5 lines...
+
+ÔùÅ Commit all three new files (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git add
+  Ôöé avs-deployment/bicep/azure-integration.bicep
+  Ôöé avs-deployment/scripts/configure-azure-services.ps1
+  Ôöé harbor-retail-vmware/documentation/azure-integration-guide.md && git
+  Ôöé commit -m "Step 9: Add Azure integration resources for AVS native service ÔÇª
+  Ôöö 26 lines...
+
+All three files created and committed. Here's a summary:
+
+**1. `avs-deployment/bicep/azure-integration.bicep`** ÔÇö Deploys:
+- Private DNS zones (`privatelink.database.windows.net`, `privatelink.blob.core.windows.net`) with VNet links to both transit and app VNets
+- Private endpoints for Azure SQL and Blob Storage with auto DNS zone group registration
+- Azure Front Door Standard profile with endpoint for web tier
+- Application VNet with PE and workload subnets
+- VNet peering (transit Ôåö app) with gateway transit enabled
+- NSGs with scoped rules for SQL/Blob from AVS CIDR and Front Door service tag
+
+**2. `avs-deployment/scripts/configure-azure-services.ps1`** ÔÇö Follows existing patterns (Write-Log, Write-Section, try/catch, `$ErrorActionPreference = "Stop"`). Includes `-Simulate` dry-run mode. Configures DNS forwarding guidance, validates PE connectivity via DNS + TCP, provisions Azure SQL with backup retention, and creates Blob Storage containers.
+
+**3. `harbor-retail-vmware/documentation/azure-integration-guide.md`** ÔÇö Covers text-based architecture diagram, PE connectivity patterns with NSG rule table, DNS resolution flow (AVS ÔåÆ NSX-T ÔåÆ Azure Private DNS ÔåÆ PE), 4-phase modernization roadmap (AVS ÔåÆ Azure SQL ÔåÆ App Service/AKS ÔåÆ Static Web Apps), and cost optimization by phase.
+
+
+Changes   +1235 -0
+Requests  3 Premium (4m 43s)
+Tokens    Ôåæ 462.6k ÔÇó Ôåô 18.7k ÔÇó 387.9k (cached)
