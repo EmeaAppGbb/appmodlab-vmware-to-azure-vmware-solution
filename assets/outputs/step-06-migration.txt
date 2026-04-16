@@ -1,0 +1,153 @@
+ÔùÅ List directory harbor-retail-vmware\scripts\powercli
+  Ôöö 6 files found
+
+ÔùÅ List directory harbor-retail-vmware\documentation
+  Ôöö 4 files found
+
+ÔùÅ Read export-inventory.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\export-inventory.ps1
+  Ôöö 1 line read
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö 1 line read
+
+ÔùÅ Read validate-pre-migration.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\validate-pre-migration.ps1
+  Ôöö 501 lines read
+
+ÔùÅ Read migration-waves.md
+  Ôöé harbor-retail-vmware\documentation\migration-waves.md
+  Ôöö 367 lines read
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L1:100 (100 lines read)
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L100:200 (101 lines read)
+
+ÔùÅ Read export-inventory.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\export-inventory.ps1
+  Ôöö L1:80 (79 lines read)
+
+ÔùÅ Read configure-hcx.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\configure-hcx.ps1
+  Ôöö L1:80 (80 lines read)
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L200:400 (201 lines read)
+
+ÔùÅ Search (glob)
+  Ôöé "harbor-retail-vmware\vmware-config\*.json"
+  Ôöö No matches found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L400:600 (200 lines read)
+
+ÔùÅ Search (glob)
+  Ôöé "harbor-retail-vmware\**\*.json"
+  Ôöö No matches found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L600:800 (201 lines read)
+
+ÔùÅ Search (glob)
+  Ôöé "harbor-retail-vmware\vmware-config\*"
+  Ôöö No matches found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L800:950 (151 lines read)
+
+ÔùÅ List directory harbor-retail-vmware
+  Ôöö 6 files found
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L950:1050 (82 lines read)
+
+ÔùÅ List directory harbor-retail-vmware\vmware-config
+  Ôöö 5 files found
+
+ÔùÅ Read vcenter-inventory.json
+  Ôöé harbor-retail-vmware\vmware-config\vcenter-inventory.json
+  Ôöö L1:60 (60 lines read)
+
+ÔùÅ Read vcenter-inventory.json
+  Ôöé harbor-retail-vmware\vmware-config\vcenter-inventory.json
+  Ôöö L60:120 (52 lines read)
+
+Now I have a thorough understanding of the codebase conventions. Let me create both scripts.
+
+ÔùÅ Create execute-migration.ps1 +944
+  Ôöö harbor-retail-vmware\scripts\powercli\execute-migration.ps1
+
+ÔùÅ Create monitor-migration.ps1 +641
+  Ôöö harbor-retail-vmware\scripts\powercli\monitor-migration.ps1
+
+Now let me fix a string interpolation issue in execute-migration.ps1:
+
+ÔùÅ Edit execute-migration.ps1 +1 -1
+  Ôöö harbor-retail-vmware\scripts\powercli\execute-migration.ps1
+
+Let me verify both scripts parse correctly:
+
+ÔùÅ Parse both scripts for syntax errors (shell)
+  Ôöé $null = [System.Management.Automation.Language.Parser]::ParseFile("C:\code
+  Ôöé \gbb\labs\appmodlab-vmware-to-azure-vmware-solution\harbor-retail-vmware\s
+  Ôöé cripts\powercli\execute-migration.ps1", [ref]$null, [ref]$errors1);
+  Ôöé $errors1.Count
+  Ôöé $null = [System.Management.Automation.Language.Parser]::ParseFile("C:\codeÔÇª
+  Ôöö 22 lines...
+
+ÔùÅ Validate PowerShell syntax (shell)
+  Ôöé $errors1 = $null; $tokens1 = $null
+  Ôöé $null = [System.Management.Automation.Language.Parser]::ParseFile("C:\code
+  Ôöé \gbb\labs\appmodlab-vmware-to-azure-vmware-solution\harbor-retail-vmware\s
+  Ôöé cripts\powercli\execute-migration.ps1", [ref]$tokens1, [ref]$errors1)
+  Ôöé Write-Host "execute-migration.ps1 parse errors: $($errors1.Count)"ÔÇª
+  Ôöö 12 lines...
+
+Both scripts parse cleanly. Now let me commit the changes:
+
+ÔùÅ Stage and check new files (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution
+  Ôöé git add harbor-retail-vmware/scripts/powercli/execute-migration.ps1
+  Ôöé harbor-retail-vmware/scripts/powercli/monitor-migration.ps1
+  Ôöé git --no-pager diff --cached --stat
+  Ôöö 4 lines...
+
+ÔùÅ Commit new migration scripts (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution
+  Ôöé git commit -m "Add HCX migration execution and monitoring scripts
+  Ôöé
+  Ôöé Create execute-migration.ps1 that orchestrates three-wave HCX migration:
+  Ôöé - Wave 1: DB01 via HCX Bulk Migration (large disk, warm cutover)ÔÇª
+  Ôöö 29 lines...
+
+Both scripts are created and committed. Here's a summary:
+
+**`execute-migration.ps1`** ÔÇö Orchestrates the 3-wave HCX migration per `migration-waves.md`:
+- **Wave 1**: DB01 via HCX Bulk Migration with 17-phase replication simulation (seed ÔåÆ disk1 ÔåÆ disk2 ÔåÆ delta ÔåÆ cutover)
+- **Wave 2**: APP01/APP02 via HCX vMotion with memory pre-copy and sub-second switchover
+- **Wave 3**: WEB01/WEB02 via HCX vMotion with rolling LB drain (removes from pool ÔåÆ migrates ÔåÆ re-adds)
+- Each wave: pre-validation ÔåÆ HCX execution ÔåÆ post-migration power-on/service checks
+- `-Simulate` mode with realistic timing, `-DryRun` for pre-check-only, `-WaveFilter` for specific waves
+- Produces per-wave and overall JSON reports in `.\output`
+
+**`monitor-migration.ps1`** ÔÇö Dashboard-style migration monitor:
+- Grouped-by-wave display with progress bars, data transferred, ETA, and current phase
+- Overall summary panel with completion stats
+- Simulated state engine advances all 5 VMs through realistic phases across waves
+- Auto-refreshes at configurable intervals; writes JSON snapshots on each refresh
+- Produces final report with full snapshot history
+
+
+Changes   +1586 -1
+Requests  3 Premium (6m 47s)
+Tokens    Ôåæ 1.1m ÔÇó Ôåô 25.3k ÔÇó 968.5k (cached)
