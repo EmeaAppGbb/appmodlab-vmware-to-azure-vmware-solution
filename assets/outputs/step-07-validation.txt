@@ -1,0 +1,101 @@
+ÔùÅ List directory harbor-retail-vmware\scripts\powercli
+  Ôöö 8 files found
+
+ÔùÅ List directory harbor-retail-vmware
+  Ôöö 6 files found
+
+ÔùÅ Read monitor-migration.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\monitor-migration.ps1
+  Ôöö 1 line read
+
+ÔùÅ Read validate-pre-migration.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\validate-pre-migration.ps1
+  Ôöö 501 lines read
+
+ÔùÅ Read monitor-migration.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\monitor-migration.ps1
+  Ôöö L1:80 (80 lines read)
+
+ÔùÅ List directory harbor-retail-vmware\vm-specs
+  Ôöö 3 files found
+
+ÔùÅ List directory harbor-retail-vmware\networking
+  Ôöö 5 files found
+
+ÔùÅ List directory harbor-retail-vmware\networking\nsx-t-config
+  Ôöö 3 files found
+
+ÔùÅ List directory harbor-retail-vmware\networking\load-balancer
+  Ôöö 1 file found
+
+ÔùÅ Read lb-config.json
+  Ôöé harbor-retail-vmware\networking\load-balancer\lb-config.json
+  Ôöö 24 lines read
+
+ÔùÅ Read firewall-rules.json
+  Ôöé harbor-retail-vmware\networking\nsx-t-config\firewall-rules.json
+  Ôöö 177 lines read
+
+ÔùÅ Read dns-records.json
+  Ôöé harbor-retail-vmware\networking\dns-records.json
+  Ôöö 45 lines read
+
+ÔùÅ Read segments.json
+  Ôöé harbor-retail-vmware\networking\nsx-t-config\segments.json
+  Ôöö 114 lines read
+
+Now I have full context on the conventions and network config. Let me create both scripts.
+
+ÔùÅ Create validate-post-migration.ps1 +635
+  Ôöö harbor-retail-vmware\scripts\powercli\validate-post-migration.ps1
+
+ÔùÅ Create validate-nsx-t-rules.ps1 +526
+  Ôöö harbor-retail-vmware\scripts\powercli\validate-nsx-t-rules.ps1
+
+Now let me verify the scripts parse correctly:
+
+ÔùÅ Validate PowerShell syntax (shell)
+  Ôöé pwsh -NoProfile -Command "
+  Ôöé `$ast1 = [System.Management.Automation.Language.Parser]::ParseFile('C:
+  Ôöé \code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution\harbor-retail-vmw
+  Ôöé are\scripts\powercli\validate-post-migration.ps1', [ref]`$null,
+  Ôöé [ref]`$errors1)ÔÇª
+  Ôöö 24 lines...
+
+Both scripts parse cleanly. Let me commit:
+
+ÔùÅ Stage new scripts (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git add
+  Ôöé harbor-retail-vmware/scripts/powercli/validate-post-migration.ps1
+  Ôöé harbor-retail-vmware/scripts/powercli/validate-nsx-t-rules.ps1 && git
+  Ôöé --no-pager diff --cached --stat
+  Ôöö 4 lines...
+
+ÔùÅ Commit validation scripts (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git
+  Ôöé commit -m "Add post-migration and NSX-T firewall validation scripts
+  Ôöé
+  Ôöé Add two PowerCLI scripts for Step 7 (Validate Post-Migration):ÔÇª
+  Ôöö 30 lines...
+
+Both scripts are created and committed. Here's a summary:
+
+**`validate-post-migration.ps1`** ÔÇö Comprehensive post-migration validation:
+- **VM health**: All 5 VMs powered on, responsive, correct IPs (WEB01/02: 10.10.10.11-12, APP01/02: 10.10.20.11-12, DB01: 10.10.30.11), VMware Tools running
+- **DNS**: Forward resolution for all VMs in `harbor.local` zone
+- **Tier-specific**: IIS `/health` on web tier, API `/health:8080` on app tier, SQL TCP 1433 on DB01
+- **Cross-tier**: 6 connectivity tests (webÔåÆapp:8080, appÔåÆdb:1433)
+- **Load balancer**: VIP health check on 192.168.1.100
+
+**`validate-nsx-t-rules.ps1`** ÔÇö NSX-T DFW rule validation:
+- **Security groups**: Verifies all 4 groups exist (web, app, db, all-harbor)
+- **Firewall rules**: Validates 5 rules across 2 policies with correct actions
+- **Traffic flows**: 10 tests ÔÇö webÔåÆapp ALLOW (443/8080), appÔåÆdb ALLOW (1433), webÔåÆdb BLOCK (1433/80/22)
+- **Management**: DNS/AD services (53, 88, 389, 636) from each tier
+
+Both support `-Simulate` mode and output JSON reports.
+
+
+Changes   +1161 -0
+Requests  3 Premium (4m 14s)
+Tokens    Ôåæ 455.0k ÔÇó Ôåô 17.2k ÔÇó 401.3k (cached)
