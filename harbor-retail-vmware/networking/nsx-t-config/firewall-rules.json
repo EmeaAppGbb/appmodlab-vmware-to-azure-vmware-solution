@@ -1,0 +1,177 @@
+{
+  "version": "NSX-T 3.2",
+  "description": "NSX-T distributed firewall policies migrated from NSX-V for Harbor Retail on AVS",
+  "securityGroups": [
+    {
+      "id": "sg-web-tier",
+      "displayName": "Web-Tier-Group",
+      "expression": [
+        {
+          "resourceType": "Condition",
+          "memberType": "Segment",
+          "key": "Tag",
+          "operator": "EQUALS",
+          "value": "web|tier"
+        }
+      ]
+    },
+    {
+      "id": "sg-app-tier",
+      "displayName": "App-Tier-Group",
+      "expression": [
+        {
+          "resourceType": "Condition",
+          "memberType": "Segment",
+          "key": "Tag",
+          "operator": "EQUALS",
+          "value": "app|tier"
+        }
+      ]
+    },
+    {
+      "id": "sg-db-tier",
+      "displayName": "DB-Tier-Group",
+      "expression": [
+        {
+          "resourceType": "Condition",
+          "memberType": "Segment",
+          "key": "Tag",
+          "operator": "EQUALS",
+          "value": "database|tier"
+        }
+      ]
+    },
+    {
+      "id": "sg-all-harbor",
+      "displayName": "All-Harbor-Retail",
+      "expression": [
+        {
+          "resourceType": "Condition",
+          "memberType": "Segment",
+          "key": "Tag",
+          "operator": "EQUALS",
+          "value": "harbor-retail|application"
+        }
+      ]
+    }
+  ],
+  "services": [
+    {
+      "id": "svc-web-ports",
+      "displayName": "Web-Ports",
+      "serviceEntries": [
+        {"protocol": "TCP", "destinationPorts": ["443"], "displayName": "HTTPS"},
+        {"protocol": "TCP", "destinationPorts": ["8080"], "displayName": "HTTP-Alt"}
+      ]
+    },
+    {
+      "id": "svc-mssql",
+      "displayName": "MS-SQL",
+      "serviceEntries": [
+        {"protocol": "TCP", "destinationPorts": ["1433"], "displayName": "MS-SQL-Server"}
+      ]
+    },
+    {
+      "id": "svc-ad-dns",
+      "displayName": "AD-DNS-Services",
+      "serviceEntries": [
+        {"protocol": "TCP", "destinationPorts": ["53"], "displayName": "DNS-TCP"},
+        {"protocol": "UDP", "destinationPorts": ["53"], "displayName": "DNS-UDP"},
+        {"protocol": "TCP", "destinationPorts": ["88"], "displayName": "Kerberos-TCP"},
+        {"protocol": "UDP", "destinationPorts": ["88"], "displayName": "Kerberos-UDP"},
+        {"protocol": "TCP", "destinationPorts": ["389"], "displayName": "LDAP"},
+        {"protocol": "TCP", "destinationPorts": ["636"], "displayName": "LDAPS"}
+      ]
+    }
+  ],
+  "policies": [
+    {
+      "id": "policy-harbor-retail-microsegmentation",
+      "displayName": "Harbor-Retail-Microsegmentation",
+      "description": "Migrated from NSX-V section Harbor-Retail-Microsegmentation",
+      "category": "Application",
+      "sequenceNumber": 100,
+      "rules": [
+        {
+          "id": "rule-2001",
+          "displayName": "DFW-Allow-Web-to-App",
+          "description": "Allow web tier to communicate with app tier on HTTPS/8080. Migrated from NSX-V rule 1001.",
+          "sequenceNumber": 10,
+          "sourceGroups": ["/infra/domains/default/groups/sg-web-tier"],
+          "destinationGroups": ["/infra/domains/default/groups/sg-app-tier"],
+          "services": ["/infra/services/svc-web-ports"],
+          "action": "ALLOW",
+          "direction": "IN_OUT",
+          "ipProtocol": "IPV4_IPV6",
+          "logged": true,
+          "tag": "migrated-from-nsxv-1001"
+        },
+        {
+          "id": "rule-2002",
+          "displayName": "DFW-Allow-App-to-DB",
+          "description": "Allow app tier to communicate with database tier on MS-SQL 1433. Migrated from NSX-V rule 1002.",
+          "sequenceNumber": 20,
+          "sourceGroups": ["/infra/domains/default/groups/sg-app-tier"],
+          "destinationGroups": ["/infra/domains/default/groups/sg-db-tier"],
+          "services": ["/infra/services/svc-mssql"],
+          "action": "ALLOW",
+          "direction": "IN_OUT",
+          "ipProtocol": "IPV4_IPV6",
+          "logged": true,
+          "tag": "migrated-from-nsxv-1002"
+        },
+        {
+          "id": "rule-2003",
+          "displayName": "DFW-Block-Web-to-DB",
+          "description": "Block direct web-to-database traffic. Migrated from NSX-V rule 1003.",
+          "sequenceNumber": 30,
+          "sourceGroups": ["/infra/domains/default/groups/sg-web-tier"],
+          "destinationGroups": ["/infra/domains/default/groups/sg-db-tier"],
+          "services": ["ANY"],
+          "action": "DROP",
+          "direction": "IN_OUT",
+          "ipProtocol": "IPV4_IPV6",
+          "logged": true,
+          "tag": "migrated-from-nsxv-1003"
+        }
+      ]
+    },
+    {
+      "id": "policy-harbor-retail-management",
+      "displayName": "Harbor-Retail-Management",
+      "description": "Management services rules for AD, DNS, and directory services",
+      "category": "Infrastructure",
+      "sequenceNumber": 50,
+      "rules": [
+        {
+          "id": "rule-3001",
+          "displayName": "Allow-AD-DNS-All-Tiers",
+          "description": "Allow all Harbor Retail VMs to reach AD/DNS services (TCP/UDP 53,88,389,636)",
+          "sequenceNumber": 10,
+          "sourceGroups": ["/infra/domains/default/groups/sg-all-harbor"],
+          "destinationGroups": ["ANY"],
+          "services": ["/infra/services/svc-ad-dns"],
+          "action": "ALLOW",
+          "direction": "OUT",
+          "ipProtocol": "IPV4_IPV6",
+          "logged": true,
+          "tag": "management-ad-dns"
+        },
+        {
+          "id": "rule-3002",
+          "displayName": "Allow-AD-DNS-Response",
+          "description": "Allow AD/DNS response traffic back to all Harbor Retail VMs",
+          "sequenceNumber": 20,
+          "sourceGroups": ["ANY"],
+          "destinationGroups": ["/infra/domains/default/groups/sg-all-harbor"],
+          "services": ["/infra/services/svc-ad-dns"],
+          "action": "ALLOW",
+          "direction": "IN",
+          "ipProtocol": "IPV4_IPV6",
+          "logged": false,
+          "tag": "management-ad-dns-response"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,114 @@
+{
+  "version": "NSX-T 3.2",
+  "description": "NSX-T segment definitions for Harbor Retail on Azure VMware Solution",
+  "tier1Gateway": "Harbor-Retail-T1-GW",
+  "transportZone": "TNT##-OVERLAY-TZ",
+  "dhcpProfile": "Harbor-Retail-DHCP-Profile",
+  "segments": [
+    {
+      "id": "web-segment",
+      "displayName": "Web-Segment",
+      "description": "Front-end web tier segment migrated from NSX-V VLAN 10",
+      "connectivityPath": "/infra/tier-1s/Harbor-Retail-T1-GW",
+      "transportZonePath": "/infra/sites/default/enforcement-points/default/transport-zones/TNT##-OVERLAY-TZ",
+      "subnets": [
+        {
+          "gatewayAddress": "10.10.10.1/24",
+          "network": "10.10.10.0/24",
+          "dhcpConfig": {
+            "resourceType": "SegmentDhcpV4Config",
+            "serverAddress": "10.10.10.2/24",
+            "leaseTime": 86400,
+            "dhcpRanges": ["10.10.10.10-10.10.10.200"],
+            "dnsServers": ["10.10.30.11", "168.63.129.16"],
+            "options": {
+              "option121": {
+                "staticRoutes": [
+                  {
+                    "network": "0.0.0.0/0",
+                    "nextHop": "10.10.10.1"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "tags": [
+        {"scope": "environment", "tag": "production"},
+        {"scope": "tier", "tag": "web"},
+        {"scope": "application", "tag": "harbor-retail"}
+      ]
+    },
+    {
+      "id": "app-segment",
+      "displayName": "App-Segment",
+      "description": "Application tier segment migrated from NSX-V VLAN 20",
+      "connectivityPath": "/infra/tier-1s/Harbor-Retail-T1-GW",
+      "transportZonePath": "/infra/sites/default/enforcement-points/default/transport-zones/TNT##-OVERLAY-TZ",
+      "subnets": [
+        {
+          "gatewayAddress": "10.10.20.1/24",
+          "network": "10.10.20.0/24",
+          "dhcpConfig": {
+            "resourceType": "SegmentDhcpV4Config",
+            "serverAddress": "10.10.20.2/24",
+            "leaseTime": 86400,
+            "dhcpRanges": ["10.10.20.10-10.10.20.200"],
+            "dnsServers": ["10.10.30.11", "168.63.129.16"],
+            "options": {
+              "option121": {
+                "staticRoutes": [
+                  {
+                    "network": "0.0.0.0/0",
+                    "nextHop": "10.10.20.1"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "tags": [
+        {"scope": "environment", "tag": "production"},
+        {"scope": "tier", "tag": "app"},
+        {"scope": "application", "tag": "harbor-retail"}
+      ]
+    },
+    {
+      "id": "db-segment",
+      "displayName": "DB-Segment",
+      "description": "Database tier segment migrated from NSX-V VLAN 30",
+      "connectivityPath": "/infra/tier-1s/Harbor-Retail-T1-GW",
+      "transportZonePath": "/infra/sites/default/enforcement-points/default/transport-zones/TNT##-OVERLAY-TZ",
+      "subnets": [
+        {
+          "gatewayAddress": "10.10.30.1/24",
+          "network": "10.10.30.0/24",
+          "dhcpConfig": {
+            "resourceType": "SegmentDhcpV4Config",
+            "serverAddress": "10.10.30.2/24",
+            "leaseTime": 86400,
+            "dhcpRanges": ["10.10.30.10-10.10.30.200"],
+            "dnsServers": ["10.10.30.11", "168.63.129.16"],
+            "options": {
+              "option121": {
+                "staticRoutes": [
+                  {
+                    "network": "0.0.0.0/0",
+                    "nextHop": "10.10.30.1"
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "tags": [
+        {"scope": "environment", "tag": "production"},
+        {"scope": "tier", "tag": "database"},
+        {"scope": "application", "tag": "harbor-retail"}
+      ]
+    }
+  ]
+}

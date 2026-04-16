@@ -7,5 +7,39 @@
     {"hostname": "app02", "ipAddress": "10.10.20.12"},
     {"hostname": "db01", "ipAddress": "10.10.30.11"},
     {"hostname": "portal", "ipAddress": "192.168.1.100", "description": "Load balancer VIP"}
+  ],
+  "avsRecords": [
+    {
+      "hostname": "vcenter.avs",
+      "ipAddress": "10.0.0.2",
+      "description": "AVS vCenter Server management endpoint"
+    },
+    {
+      "hostname": "nsxt-manager.avs",
+      "ipAddress": "10.0.0.3",
+      "description": "AVS NSX-T Manager endpoint"
+    },
+    {
+      "hostname": "hcx-manager.avs",
+      "ipAddress": "10.0.0.9",
+      "description": "HCX Cloud Manager endpoint for workload migration"
+    },
+    {
+      "hostname": "hcx-connector",
+      "ipAddress": "192.168.1.50",
+      "description": "HCX Connector on-premises appliance"
+    }
+  ],
+  "cnameRecords": [
+    {
+      "alias": "vcenter",
+      "target": "vcenter.avs.harbor.local",
+      "description": "Friendly alias for AVS vCenter"
+    },
+    {
+      "alias": "nsxmanager",
+      "target": "nsxt-manager.avs.harbor.local",
+      "description": "Friendly alias for AVS NSX-T Manager"
+    }
   ]
 }

@@ -1,0 +1,115 @@
+{
+  "version": "NSX-T 3.2",
+  "description": "Tier-0 and Tier-1 gateway configuration for Harbor Retail on Azure VMware Solution",
+  "tier0Gateway": {
+    "id": "TNT##-T0",
+    "displayName": "TNT##-T0",
+    "description": "AVS-managed Tier-0 gateway (read-only, managed by Azure VMware Solution)",
+    "haMode": "ACTIVE_STANDBY",
+    "note": "Tier-0 is managed by AVS. Route redistribution and BGP peering are configured via Azure portal or CLI.",
+    "routeRedistribution": {
+      "bgpEnabled": true,
+      "redistributionRules": [
+        {
+          "name": "redistribute-tier1-connected",
+          "routeRedistributionTypes": ["TIER1_CONNECTED", "TIER1_STATIC", "TIER1_NAT"]
+        }
+      ]
+    }
+  },
+  "tier1Gateway": {
+    "id": "Harbor-Retail-T1-GW",
+    "displayName": "Harbor-Retail-T1-GW",
+    "description": "Tier-1 gateway for Harbor Retail application segments",
+    "tier0Path": "/infra/tier-0s/TNT##-T0",
+    "failoverMode": "NON_PREEMPTIVE",
+    "routeAdvertisementTypes": [
+      "TIER1_CONNECTED",
+      "TIER1_STATIC_ROUTES",
+      "TIER1_NAT",
+      "TIER1_IPSEC_LOCAL_ENDPOINT"
+    ],
+    "staticRoutes": [
+      {
+        "id": "default-route",
+        "displayName": "Default-Route-to-T0",
+        "network": "0.0.0.0/0",
+        "nextHops": [
+          {
+            "ipAddress": "",
+            "adminDistance": 1,
+            "scope": ["/infra/tier-0s/TNT##-T0"]
+          }
+        ]
+      }
+    ],
+    "natRules": [
+      {
+        "id": "nat-web-snat",
+        "displayName": "Web-Tier-SNAT",
+        "description": "Source NAT for web tier external access",
+        "action": "SNAT",
+        "sourceNetwork": "10.10.10.0/24",
+        "translatedNetwork": "192.168.100.10",
+        "enabled": true,
+        "logging": true,
+        "sequenceNumber": 100,
+        "firewallMatch": "MATCH_INTERNAL_ADDRESS"
+      },
+      {
+        "id": "nat-portal-dnat",
+        "displayName": "Portal-DNAT",
+        "description": "Destination NAT for external access to Harbor Retail portal",
+        "action": "DNAT",
+        "destinationNetwork": "192.168.100.20",
+        "translatedNetwork": "10.10.10.11",
+        "translatedPorts": "443",
+        "enabled": true,
+        "logging": true,
+        "sequenceNumber": 200,
+        "firewallMatch": "MATCH_EXTERNAL_ADDRESS"
+      },
+      {
+        "id": "nat-app-snat",
+        "displayName": "App-Tier-SNAT",
+        "description": "Source NAT for app tier external access",
+        "action": "SNAT",
+        "sourceNetwork": "10.10.20.0/24",
+        "translatedNetwork": "192.168.100.11",
+        "enabled": true,
+        "logging": true,
+        "sequenceNumber": 300,
+        "firewallMatch": "MATCH_INTERNAL_ADDRESS"
+      }
+    ],
+    "dnsForwarder": {
+      "id": "harbor-retail-dns-forwarder",
+      "displayName": "Harbor-Retail-DNS-Forwarder",
+      "description": "DNS forwarder for Harbor Retail name resolution",
+      "listenerIp": "10.10.10.1",
+      "enabled": true,
+      "defaultForwarderZone": {
+        "id": "default-zone",
+        "displayName": "Default-Forwarder-Zone",
+        "upstreamServers": ["168.63.129.16"],
+        "description": "Forward to Azure DNS for public and Azure Private DNS resolution"
+      },
+      "conditionalForwarderZones": [
+        {
+          "id": "harbor-local-zone",
+          "displayName": "Harbor-Local-Zone",
+          "domainNames": ["harbor.local"],
+          "upstreamServers": ["10.10.30.11"],
+          "description": "Forward harbor.local queries to on-premises AD DNS"
+        },
+        {
+          "id": "avs-private-zone",
+          "displayName": "AVS-Private-Zone",
+          "domainNames": ["avs.azure.com", "privatelink.blob.core.windows.net", "privatelink.database.windows.net"],
+          "upstreamServers": ["168.63.129.16"],
+          "description": "Forward AVS and Azure Private Link DNS queries to Azure DNS"
+        }
+      ]
+    }
+  }
+}
