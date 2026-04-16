@@ -1,0 +1,64 @@
+ÔùÅ List directory avs-deployment\scripts
+  Ôöö 4 files found
+
+ÔùÅ Read configure-backup.ps1
+  Ôöé avs-deployment\scripts\configure-backup.ps1
+  Ôöö 36 lines read
+
+ÔùÅ Read configure-monitoring.ps1
+  Ôöé avs-deployment\scripts\configure-monitoring.ps1
+  Ôöö 31 lines read
+
+Now I'll implement all three scripts in parallel.
+
+ÔùÅ Create configure-identity.ps1 +351
+  Ôöö avs-deployment\scripts\configure-identity.ps1
+
+ÔùÅ Edit configure-monitoring.ps1 +353 -23
+  Ôöö avs-deployment\scripts\configure-monitoring.ps1
+
+ÔùÅ Edit configure-backup.ps1 +234 -25
+  Ôöö avs-deployment\scripts\configure-backup.ps1
+
+Now let me verify the files and commit.
+
+ÔùÅ Check git status of changed scripts (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git
+  Ôöé --no-pager diff --stat && git --no-pager status --short
+  Ôöé avs-deployment/scripts/
+  Ôöö 7 lines...
+
+ÔùÅ Commit post-migration scripts (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution && git add
+  Ôöé avs-deployment/scripts/configure-backup.ps1
+  Ôöé avs-deployment/scripts/configure-monitoring.ps1
+  Ôöé avs-deployment/scripts/configure-identity.ps1 && git commit -m "Step 8:
+  Ôöé Enhance post-migration backup, monitoring, and identity scriptsÔÇª
+  Ôöö 34 lines...
+
+All three scripts are done. Here's a summary:
+
+**configure-backup.ps1** ÔÇö Enhanced with:
+- Idempotent Recovery Services vault creation
+- Two tiered policies: **Daily/30-day** (WEB01/02, APP01/02) and **4-hourly/90-day** (DB01)
+- Post-enable backup validation checking protection state
+- Tabular status report; `-Simulate` dry-run mode
+
+**configure-monitoring.ps1** ÔÇö Enhanced with:
+- Idempotent Log Analytics workspace creation
+- Diagnostic settings (VMwareSyslog + AllMetrics) via Az.Monitor
+- 6 metric alert rules (CPU/Memory/Storage ├ù Warning 80%/Critical 90%)
+- Action group with configurable email notification
+- 4-panel performance dashboard (CPU, Memory, Disk, Network); `-Simulate` mode
+
+**configure-identity.ps1** ÔÇö New script:
+- LDAPS connectivity test (TCP + TLS handshake + cert expiry warning)
+- 3 AVS service accounts (vCenter, HCX, Backup) with random passwords
+- vCenter SSO identity source registration via `Az.VMware`
+- Remote AD authentication validation on all 5 VMs via `Invoke-AzVMRunCommand`
+- `-Simulate` mode throughout
+
+
+Changes   +938 -48
+Requests  3 Premium (2m 56s)
+Tokens    Ôåæ 195.7k ÔÇó Ôåô 12.6k ÔÇó 162.3k (cached)
