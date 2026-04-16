@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DB01 VM Spec — SQL Server 2019 Critical Workload</title>
+<style>
+  body { margin:0; padding:32px; background:#1e1e2e; font-family:'Cascadia Code','Fira Code',monospace; color:#cdd6f4; }
+  .header { background:#313244; border-radius:10px 10px 0 0; padding:14px 20px; display:flex; align-items:center; gap:10px; }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .r { background:#f38ba8; } .y { background:#f9e2af; } .g { background:#a6e3a1; }
+  .title { margin-left:12px; font-size:13px; color:#a6adc8; }
+  .badge { background:#f38ba8; color:#1e1e2e; font-size:11px; padding:2px 8px; border-radius:4px; margin-left:auto; font-weight:700; }
+  pre { margin:0; padding:20px; background:#181825; border-radius:0 0 10px 10px; overflow-x:auto; font-size:12.5px; line-height:1.6; }
+  .b { color:#89b4fa; } .s { color:#a6e3a1; } .n { color:#fab387; } .p { color:#cdd6f4; }
+  .c { color:#6c7086; font-style:italic; } .w { color:#f9e2af; }
+  .caption { text-align:center; color:#6c7086; font-size:12px; margin-top:16px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="title">vm-specs / db-tier / db01-spec.json</span>
+  <span class="badge">CRITICAL</span>
+</div>
+<pre>
+<span class="p">{</span>
+  <span class="b">"vmName"</span>: <span class="s">"HARBOR-DB01"</span>,
+  <span class="b">"tier"</span>:   <span class="s">"db-tier"</span>,   <span class="b">"environment"</span>: <span class="s">"production"</span>,
+
+  <span class="c">// ── Hardware ──────────────────────────────────────────────</span>
+  <span class="b">"hardware"</span>: <span class="p">{</span>
+    <span class="b">"cpu"</span>:     <span class="p">{</span> <span class="b">"vCPUs"</span>: <span class="n">16</span>, <span class="b">"sockets"</span>: <span class="n">2</span>, <span class="b">"coresPerSocket"</span>: <span class="n">8</span>,
+                  <span class="b">"reservationMHz"</span>: <span class="n">16000</span>, <span class="b">"limitMHz"</span>: <span class="n">32000</span> <span class="p">}</span>,
+    <span class="b">"memory"</span>:  <span class="p">{</span> <span class="b">"sizeGB"</span>: <span class="n">64</span>,  <span class="b">"reservationGB"</span>: <span class="n">48</span> <span class="p">}</span>,
+    <span class="b">"storage"</span>: <span class="p">{</span>
+      <span class="b">"disks"</span>: <span class="p">[</span>
+        <span class="p">{</span> <span class="b">"label"</span>: <span class="s">"Disk 1"</span>, <span class="b">"sizeGB"</span>: <span class="n">200</span>, <span class="b">"type"</span>: <span class="s">"thick-eager-zeroed"</span>,
+          <span class="b">"purpose"</span>: <span class="s">"OS and SQL Server binaries"</span> <span class="p">}</span>,
+        <span class="p">{</span> <span class="b">"label"</span>: <span class="s">"Disk 2"</span>, <span class="b">"sizeGB"</span>: <span class="n">500</span>, <span class="b">"type"</span>: <span class="s">"thick-eager-zeroed"</span>,
+          <span class="b">"datastore"</span>: <span class="s">"vsanDatastore-SSD"</span>,
+          <span class="b">"purpose"</span>: <span class="s">"SQL data, logs, TempDB"</span> <span class="p">}</span>
+      <span class="p">]</span>, <span class="b">"totalStorageGB"</span>: <span class="n">700</span>
+    <span class="p">}</span>
+  <span class="p">}</span>,
+
+  <span class="c">// ── SQL Server 2019 Enterprise ─────────────────────────────</span>
+  <span class="b">"softwareStack"</span>: <span class="p">{</span>
+    <span class="b">"applications"</span>: <span class="p">[{</span>
+      <span class="b">"name"</span>:      <span class="s">"Microsoft SQL Server 2019"</span>,
+      <span class="b">"version"</span>:   <span class="s">"15.0.4316.3"</span>,  <span class="b">"edition"</span>: <span class="s">"Enterprise"</span>,
+      <span class="b">"maxMemoryMB"</span>: <span class="n">51200</span>,  <span class="b">"maxDOP"</span>: <span class="n">8</span>,
+      <span class="b">"collation"</span>: <span class="s">"SQL_Latin1_General_CP1_CI_AS"</span>,
+      <span class="b">"databases"</span>: <span class="p">[</span>
+        <span class="p">{</span> <span class="b">"name"</span>: <span class="s">"HarborRetail"</span>,         <span class="b">"sizeMB"</span>: <span class="n">85000</span>,  <span class="b">"recovery"</span>: <span class="s">"Full"</span> <span class="p">}</span>,
+        <span class="p">{</span> <span class="b">"name"</span>: <span class="s">"HarborRetail_Archive"</span>,  <span class="b">"sizeMB"</span>: <span class="n">120000</span>, <span class="b">"recovery"</span>: <span class="s">"Simple"</span> <span class="p">}</span>,
+        <span class="p">{</span> <span class="b">"name"</span>: <span class="s">"HarborRetail_Staging"</span>,  <span class="b">"sizeMB"</span>: <span class="n">15000</span>,  <span class="b">"recovery"</span>: <span class="s">"Simple"</span> <span class="p">}</span>
+      <span class="p">]</span>,
+      <span class="b">"backupSchedule"</span>: <span class="p">{</span>
+        <span class="b">"full"</span>: <span class="s">"Daily 02:00 AM"</span>,
+        <span class="b">"differential"</span>: <span class="s">"Every 6 hours"</span>,
+        <span class="b">"transactionLog"</span>: <span class="s">"Every 15 minutes"</span>
+      <span class="p">}</span>
+    <span class="p">}]</span>
+  <span class="p">}</span>,
+
+  <span class="c">// ── Performance Baseline (30-day avg) ─────────────────────</span>
+  <span class="b">"performanceBaseline"</span>: <span class="p">{</span>
+    <span class="b">"cpu"</span>:     <span class="p">{</span> <span class="b">"avg"</span>: <span class="s">"48%"</span>,  <span class="b">"peak"</span>: <span class="s">"88%"</span>  <span class="p">}</span>,
+    <span class="b">"memory"</span>:  <span class="p">{</span> <span class="b">"avg"</span>: <span class="s">"82%"</span>,  <span class="b">"peak"</span>: <span class="s">"94%"</span>  <span class="p">}</span>,
+    <span class="b">"storage"</span>: <span class="p">{</span> <span class="b">"readIOPS"</span>: <span class="n">1800</span>, <span class="b">"writeIOPS"</span>: <span class="n">950</span>, <span class="b">"latencyMs"</span>: <span class="n">1.8</span> <span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+<p class="caption">Screenshot 3 — HARBOR-DB01: SQL Server 2019 Enterprise · 16 vCPU · 64 GB · 700 GB thick-provisioned · 220 GB databases</p>
+</body>
+</html>

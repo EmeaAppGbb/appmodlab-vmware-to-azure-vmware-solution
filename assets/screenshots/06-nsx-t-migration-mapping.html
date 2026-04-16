@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>NSX-V → NSX-T Migration Mapping</title>
+<style>
+  body { margin:0; padding:32px; background:#1e1e2e; font-family:'Cascadia Code','Fira Code',monospace; color:#cdd6f4; }
+  .header { background:#313244; border-radius:10px 10px 0 0; padding:14px 20px; display:flex; align-items:center; gap:10px; }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .r { background:#f38ba8; } .y { background:#f9e2af; } .g { background:#a6e3a1; }
+  .title { margin-left:12px; font-size:13px; color:#a6adc8; }
+  .badge { background:#89dceb; color:#1e1e2e; font-size:11px; padding:2px 8px; border-radius:4px; margin-left:auto; font-weight:700; }
+  .card { background:#181825; border-radius:0 0 10px 10px; padding:24px; }
+  table { width:100%; border-collapse:collapse; font-size:13px; margin-bottom:20px; }
+  th { text-align:left; padding:10px 12px; background:#313244; color:#cba6f7; font-weight:600; border-bottom:2px solid #45475a; }
+  td { padding:10px 12px; border-bottom:1px solid #313244; }
+  .arrow { color:#f9e2af; font-weight:700; }
+  .old { color:#f38ba8; } .new { color:#a6e3a1; }
+  .section-title { color:#89b4fa; font-size:14px; font-weight:700; margin:16px 0 8px; }
+  .note { color:#6c7086; font-size:12px; font-style:italic; margin-top:12px; }
+  .caption { text-align:center; color:#6c7086; font-size:12px; margin-top:16px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="title">networking / nsx-t-migration-mapping.md</span>
+  <span class="badge">NSX Migration</span>
+</div>
+<div class="card">
+
+<div class="section-title">🔐 Distributed Firewall Rules</div>
+<table>
+  <tr><th>NSX-V Rule</th><th></th><th>NSX-T Equivalent</th><th>Notes</th></tr>
+  <tr>
+    <td class="old">Allow-Web-to-App</td>
+    <td class="arrow">→</td>
+    <td class="new">DFW-Allow-Web-to-App</td>
+    <td>Tier-1 Gateway firewall</td>
+  </tr>
+  <tr>
+    <td class="old">Allow-App-to-DB</td>
+    <td class="arrow">→</td>
+    <td class="new">DFW-Allow-App-to-DB</td>
+    <td>Distributed firewall</td>
+  </tr>
+  <tr>
+    <td class="old">Block-Web-to-DB</td>
+    <td class="arrow">→</td>
+    <td class="new">DFW-Block-Web-to-DB</td>
+    <td>Implicit deny at end</td>
+  </tr>
+</table>
+
+<div class="section-title">🌐 Network Segments</div>
+<table>
+  <tr><th>NSX-V Port Group</th><th></th><th>NSX-T Segment</th><th>Subnet</th><th>Gateway</th></tr>
+  <tr>
+    <td class="old">Web-Segment (VLAN 10)</td>
+    <td class="arrow">→</td>
+    <td class="new">Web-Segment</td>
+    <td>10.10.10.0/24</td>
+    <td>10.10.10.1</td>
+  </tr>
+  <tr>
+    <td class="old">App-Segment (VLAN 20)</td>
+    <td class="arrow">→</td>
+    <td class="new">App-Segment</td>
+    <td>10.10.20.0/24</td>
+    <td>10.10.20.1</td>
+  </tr>
+  <tr>
+    <td class="old">DB-Segment (VLAN 30)</td>
+    <td class="arrow">→</td>
+    <td class="new">DB-Segment</td>
+    <td>10.10.30.0/24</td>
+    <td>10.10.30.1</td>
+  </tr>
+</table>
+
+<div class="section-title">⚖️ Load Balancer Strategy</div>
+<table>
+  <tr><th>Component</th><th></th><th>Target</th></tr>
+  <tr>
+    <td class="old">NSX-V Edge Load Balancer</td>
+    <td class="arrow">→</td>
+    <td class="new">NSX-T LB (east-west) + Azure Front Door (north-south)</td>
+  </tr>
+</table>
+
+<p class="note">💡 Recommendation: Use NSX-T Load Balancer for internal traffic, Azure Front Door for internet-facing traffic.</p>
+</div>
+<p class="caption">Screenshot 6 — NSX-V to NSX-T migration mapping: firewall rules, segments, and load balancer strategy</p>
+</body>
+</html>

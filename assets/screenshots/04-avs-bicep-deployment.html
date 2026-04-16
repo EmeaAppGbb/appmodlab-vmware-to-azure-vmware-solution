@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AVS Deployment — Bicep IaC</title>
+<style>
+  body { margin:0; padding:32px; background:#1e1e2e; font-family:'Cascadia Code','Fira Code',monospace; color:#cdd6f4; }
+  .header { background:#313244; border-radius:10px 10px 0 0; padding:14px 20px; display:flex; align-items:center; gap:10px; }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .r { background:#f38ba8; } .y { background:#f9e2af; } .g { background:#a6e3a1; }
+  .title { margin-left:12px; font-size:13px; color:#a6adc8; }
+  .badge { background:#a6e3a1; color:#1e1e2e; font-size:11px; padding:2px 8px; border-radius:4px; margin-left:auto; font-weight:700; }
+  pre { margin:0; padding:20px; background:#181825; border-radius:0 0 10px 10px; overflow-x:auto; font-size:13px; line-height:1.65; }
+  .kw { color:#cba6f7; } .fn { color:#89b4fa; } .str { color:#a6e3a1; } .num { color:#fab387; }
+  .dec { color:#f9e2af; } .cmt { color:#6c7086; font-style:italic; } .p { color:#cdd6f4; }
+  .type { color:#f38ba8; }
+  .caption { text-align:center; color:#6c7086; font-size:12px; margin-top:16px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="title">avs-deployment / bicep / avs-deployment.bicep</span>
+  <span class="badge">Bicep IaC</span>
+</div>
+<pre>
+<span class="cmt">// Azure VMware Solution (AVS) Private Cloud Deployment
+// Harbor Retail — VMware to Azure VMware Solution Migration</span>
+
+<span class="kw">targetScope</span> = <span class="str">'subscription'</span>
+
+<span class="cmt">// ── Parameters ────────────────────────────────────────────</span>
+<span class="dec">@description</span>(<span class="str">'Azure region for all resources.'</span>)
+<span class="kw">param</span> <span class="fn">location</span> <span class="type">string</span> = <span class="str">'eastus'</span>
+
+<span class="dec">@description</span>(<span class="str">'Name of the resource group.'</span>)
+<span class="kw">param</span> <span class="fn">resourceGroupName</span> <span class="type">string</span> = <span class="str">'rg-harbor-retail-avs'</span>
+
+<span class="dec">@description</span>(<span class="str">'SKU for AVS hosts.'</span>)
+<span class="dec">@allowed</span>([<span class="str">'av36'</span>, <span class="str">'av36t'</span>, <span class="str">'av36p'</span>, <span class="str">'av52'</span>])
+<span class="kw">param</span> <span class="fn">avsSku</span> <span class="type">string</span> = <span class="str">'av36'</span>
+
+<span class="dec">@description</span>(<span class="str">'Number of hosts in the management cluster (minimum 3).'</span>)
+<span class="dec">@minValue</span>(<span class="num">3</span>)
+<span class="kw">param</span> <span class="fn">avsClusterSize</span> <span class="type">int</span> = <span class="num">3</span>
+
+<span class="dec">@description</span>(<span class="str">'CIDR block for the AVS management network (/22 required).'</span>)
+<span class="kw">param</span> <span class="fn">avsManagementCidr</span> <span class="type">string</span> = <span class="str">'10.100.0.0/22'</span>
+
+<span class="kw">param</span> <span class="fn">vnetAddressSpace</span> <span class="type">string</span> = <span class="str">'10.200.0.0/16'</span>
+<span class="kw">param</span> <span class="fn">gatewaySubnetPrefix</span> <span class="type">string</span> = <span class="str">'10.200.0.0/24'</span>
+
+<span class="kw">param</span> <span class="fn">tags</span> <span class="type">object</span> = <span class="p">{</span>
+  project:     <span class="str">'harbor-retail'</span>
+  environment: <span class="str">'production'</span>
+  workload:    <span class="str">'avs-migration'</span>
+  managed_by:  <span class="str">'bicep'</span>
+<span class="p">}</span>
+
+<span class="cmt">// ── Resource Group ─────────────────────────────────────────</span>
+<span class="kw">resource</span> rg <span class="str">'Microsoft.Resources/resourceGroups@2023-07-01'</span> = <span class="p">{</span>
+  name:     <span class="fn">resourceGroupName</span>
+  location: <span class="fn">location</span>
+  tags:     <span class="fn">tags</span>
+<span class="p">}</span>
+
+<span class="cmt">// ── Module: AVS and Networking ─────────────────────────────</span>
+<span class="kw">module</span> avsDeployment <span class="str">'avs-resources.bicep'</span> = <span class="p">{</span>
+  name:  <span class="str">'avs-resources-deployment'</span>
+  scope: rg
+  params: <span class="p">{</span>
+    location:              <span class="fn">location</span>
+    avsPrivateCloudName:   <span class="str">'pc-harbor-retail'</span>
+    avsSku:                <span class="fn">avsSku</span>
+    avsClusterSize:        <span class="fn">avsClusterSize</span>
+    avsManagementCidr:     <span class="fn">avsManagementCidr</span>
+    vnetAddressSpace:      <span class="fn">vnetAddressSpace</span>
+    gatewaySubnetPrefix:   <span class="fn">gatewaySubnetPrefix</span>
+    expressRouteAuthKeyName: <span class="str">'harbor-retail-auth-key'</span>
+    tags:                  <span class="fn">tags</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre>
+<p class="caption">Screenshot 4 — AVS private cloud provisioning via Bicep (AV36 SKU · 3-node cluster · ExpressRoute gateway)</p>
+</body>
+</html>

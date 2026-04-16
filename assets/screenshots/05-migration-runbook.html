@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>HCX Migration Runbook — PowerCLI Script</title>
+<style>
+  body { margin:0; padding:32px; background:#1e1e2e; font-family:'Cascadia Code','Fira Code',monospace; color:#cdd6f4; }
+  .header { background:#313244; border-radius:10px 10px 0 0; padding:14px 20px; display:flex; align-items:center; gap:10px; }
+  .dot { width:12px; height:12px; border-radius:50%; }
+  .r { background:#f38ba8; } .y { background:#f9e2af; } .g { background:#a6e3a1; }
+  .title { margin-left:12px; font-size:13px; color:#a6adc8; }
+  .badge { background:#cba6f7; color:#1e1e2e; font-size:11px; padding:2px 8px; border-radius:4px; margin-left:auto; font-weight:700; }
+  pre { margin:0; padding:20px; background:#181825; border-radius:0 0 10px 10px; overflow-x:auto; font-size:13px; line-height:1.65; }
+  .kw { color:#cba6f7; } .fn { color:#89b4fa; } .str { color:#a6e3a1; } .num { color:#fab387; }
+  .var { color:#f38ba8; } .cmt { color:#6c7086; font-style:italic; } .p { color:#cdd6f4; }
+  .op { color:#89dceb; } .param { color:#f9e2af; }
+  .caption { text-align:center; color:#6c7086; font-size:12px; margin-top:16px; }
+  .wave { background:#11111b; border:1px solid #313244; border-radius:8px; padding:16px 20px; margin-top:16px; font-size:13px; line-height:1.7; }
+  .wave-title { color:#f9e2af; font-weight:700; font-size:14px; margin-bottom:8px; }
+</style>
+</head>
+<body>
+<div class="header">
+  <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+  <span class="title">scripts / powercli / migration-runbook.ps1</span>
+  <span class="badge">PowerShell</span>
+</div>
+<pre>
+<span class="cmt">&lt;#
+.SYNOPSIS
+    Automates HCX migration waves for Harbor Retail VMware-to-AVS migration.
+
+.DESCRIPTION
+    Orchestrates a three-wave HCX migration strategy with full pre-migration
+    validation, simulated migration execution, and post-migration checks:
+
+      Wave 1 — Web Tier  : HARBOR-WEB01, HARBOR-WEB02
+      Wave 2 — App Tier  : HARBOR-APP01, HARBOR-APP02
+      Wave 3 — DB Tier   : HARBOR-DB01
+#&gt;</span>
+
+<span class="kw">param</span>(
+    [<span class="param">Parameter</span>(Mandatory)]
+    [<span class="param">string</span>] <span class="var">$VCenterServer</span>,
+
+    [<span class="param">Parameter</span>(Mandatory)]
+    [<span class="param">string</span>] <span class="var">$HCXServer</span>,
+
+    [<span class="param">string</span>] <span class="var">$AVSVCenterServer</span>,
+
+    [<span class="param">PSCredential</span>] <span class="var">$Credential</span>,
+
+    [<span class="param">string</span>] <span class="var">$InventoryPath</span> <span class="op">=</span> <span class="str">".\output\vcenter-inventory-export.json"</span>,
+
+    [<span class="param">switch</span>] <span class="var">$Simulate</span>,
+
+    [<span class="param">ValidateSet</span>(<span class="str">'vMotion'</span>,<span class="str">'BulkMigration'</span>,<span class="str">'ColdMigration'</span>)]
+    [<span class="param">string</span>] <span class="var">$MigrationMethod</span> <span class="op">=</span> <span class="str">"vMotion"</span>,
+
+    [<span class="param">int</span>] <span class="var">$MaxParallelMigrations</span> <span class="op">=</span> <span class="num">2</span>,
+
+    [<span class="param">switch</span>] <span class="var">$DryRun</span>
+)
+</pre>
+
+<div class="wave">
+  <div class="wave-title">🚀 Three-Wave Migration Strategy</div>
+<pre style="margin:0;background:transparent;padding:0;font-size:13px;line-height:1.7;">
+<span class="str">Wave 1 — Web Tier</span>    <span class="cmt">HARBOR-WEB01, HARBOR-WEB02</span>    <span class="num">vMotion (zero downtime)</span>
+     │  Pre-checks → VMware Tools ✓  Snapshots ✓  Network ✓  DNS ✓  IIS ✓
+     │  Post-checks → Power state ✓  IP reachable ✓  HTTP 200 ✓
+     ▼
+<span class="str">Wave 2 — App Tier</span>    <span class="cmt">HARBOR-APP01, HARBOR-APP02</span>    <span class="num">vMotion (zero downtime)</span>
+     │  Pre-checks → VMware Tools ✓  Snapshots ✓  Network ✓  DNS ✓  API ✓
+     │  Post-checks → Power state ✓  IP reachable ✓  API 200 ✓
+     ▼
+<span class="str">Wave 3 — DB Tier</span>     <span class="cmt">HARBOR-DB01</span>                   <span class="num">vMotion (zero downtime)</span>
+     │  Pre-checks → VMware Tools ✓  Snapshots ✓  Network ✓  DNS ✓  SQL ✓
+     │  Post-checks → Power state ✓  IP reachable ✓  SQL connected ✓
+     ▼
+  <span class="fn">✅ Migration Complete — All 5 VMs in AVS</span>
+</pre>
+</div>
+<p class="caption">Screenshot 5 — HCX migration runbook: 3-wave strategy (DB → App → Web) with pre/post validation per wave</p>
+</body>
+</html>
