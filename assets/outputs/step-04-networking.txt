@@ -1,0 +1,70 @@
+ÔùÅ List directory harbor-retail-vmware\networking
+  Ôöö 4 files found
+
+ÔùÅ Read nsx-t-migration-mapping.md
+  Ôöé harbor-retail-vmware\networking\nsx-t-migration-mapping.md
+  Ôöö 23 lines read
+
+ÔùÅ Read dns-records.json
+  Ôöé harbor-retail-vmware\networking\dns-records.json
+  Ôöö 11 lines read
+
+ÔùÅ List directory harbor-retail-vmware\networking\nsx-v-config
+  Ôöö 1 file found
+
+ÔùÅ Read firewall-rules.json
+  Ôöé harbor-retail-vmware\networking\nsx-v-config\firewall-rules.json
+  Ôöö 34 lines read
+
+Now I have full context. Let me create the NSX-T config directory and all four files.
+
+ÔùÅ Create nsx-t-config directory (shell)
+  Ôöé New-Item -ItemType Directory -Path "C:\code\gbb\labs\appmodlab-vmware-to-azu
+  Ôöé re-vmware-solution\harbor-retail-vmware\networking\nsx-t-config" -Force |
+  Ôöé Out-Null; Write-Output "Created"
+  Ôöö 2 lines...
+
+ÔùÅ Create segments.json +115
+  Ôöö harbor-retail-vmware\networking\nsx-t-config\segments.json
+
+ÔùÅ Create gateway-config.json +116
+  Ôöö harbor-retail-vmware\networking\nsx-t-config\gateway-config.json
+
+ÔùÅ Create firewall-rules.json +178
+  Ôöö harbor-retail-vmware\networking\nsx-t-config\firewall-rules.json
+
+Now update the DNS records file with AVS-specific entries:
+
+ÔùÅ Edit dns-records.json +34
+  Ôöö harbor-retail-vmware\networking\dns-records.json
+
+Now let me validate the JSON files are well-formed:
+
+ÔùÅ Validate JSON files (shell)
+  Ôöé $base = "C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution\harbor
+  Ôöé -retail-vmware\networking"
+  Ôöé @("nsx-t-config\segments.json","nsx-t-config\firewall-rules.json","nsx-t-c
+  Ôöé onfig\gateway-config.json","dns-records.json") | ForEach-Object {
+  Ôöé $f = Join-Path $base $_ÔÇª
+  Ôöö 8 lines...
+
+Let me commit everything:
+
+ÔùÅ Commit NSX-T networking configs (shell)
+  Ôöé cd "C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution"
+  Ôöé git --no-pager add harbor-retail-vmware/networking/nsx-t-config/
+  Ôöé harbor-retail-vmware/networking/dns-records.json
+  Ôöé git --no-pager commit -m "Step 4: Configure NSX-T networking on AVSÔÇª
+  Ôöö 22 lines...
+
+All four deliverables are complete and committed:
+
+1. **`segments.json`** ÔÇö Web/App/DB segments on Tier-1 gateway with DHCP profiles (ranges, DNS servers, option 121 routes), transport zone paths, and tags
+2. **`firewall-rules.json`** ÔÇö DFW policies with security groups (tag-based), custom services, and rules: Allow-Web-to-App (TCP 443,8080), Allow-App-to-DB (TCP 1433), Block-Web-to-DB (deny all), plus AD/DNS management rules (TCP/UDP 53,88,389,636)
+3. **`gateway-config.json`** ÔÇö Tier-0 (AVS-managed) with BGP redistribution, Tier-1 with route advertisement, SNAT/DNAT NAT rules, and DNS forwarder with conditional zones for harbor.local and Azure Private Link
+4. **`dns-records.json`** ÔÇö Updated with AVS entries for vCenter, NSX-T Manager, HCX Manager/Connector, and CNAME aliases
+
+
+Changes   +443 -0
+Requests  3 Premium (1m 54s)
+Tokens    Ôåæ 264.4k ÔÇó Ôåô 7.2k ÔÇó 235.2k (cached)
