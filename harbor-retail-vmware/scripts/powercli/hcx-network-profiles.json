@@ -1,0 +1,114 @@
+{
+  "metadata": {
+    "description": "HCX network profile definitions for Harbor Retail VMware-to-AVS migration",
+    "version": "1.0.0",
+    "author": "Harbor Retail Platform Engineering",
+    "lastUpdated": "2026-04-16"
+  },
+  "networkProfiles": {
+    "management": {
+      "name": "HCX-Management-NetworkProfile",
+      "description": "Management network for HCX appliances and control plane traffic",
+      "networkName": "HCX-Management-PortGroup",
+      "networkCIDR": "10.10.0.0/24",
+      "gateway": "10.10.0.1",
+      "prefixLength": 24,
+      "ipPools": [
+        {
+          "name": "HCX-Mgmt-Pool",
+          "startAddress": "10.10.0.10",
+          "endAddress": "10.10.0.30"
+        }
+      ],
+      "dns": {
+        "primary": "10.10.0.2",
+        "secondary": "10.10.0.3",
+        "searchDomains": ["harbor.local"]
+      },
+      "mtu": 1500,
+      "vlanId": 10,
+      "purpose": "management"
+    },
+    "vMotion": {
+      "name": "HCX-vMotion-NetworkProfile",
+      "description": "Dedicated vMotion network for live VM migration traffic",
+      "networkName": "HCX-vMotion-PortGroup",
+      "networkCIDR": "10.10.40.0/24",
+      "gateway": "10.10.40.1",
+      "prefixLength": 24,
+      "ipPools": [
+        {
+          "name": "HCX-vMotion-Pool",
+          "startAddress": "10.10.40.10",
+          "endAddress": "10.10.40.30"
+        }
+      ],
+      "dns": {
+        "primary": "10.10.0.2",
+        "secondary": "10.10.0.3",
+        "searchDomains": ["harbor.local"]
+      },
+      "mtu": 9000,
+      "vlanId": 40,
+      "purpose": "vMotion"
+    },
+    "uplink": {
+      "name": "HCX-Uplink-NetworkProfile",
+      "description": "Uplink network for HCX tunnel (WAN) connectivity to AVS",
+      "networkName": "HCX-Uplink-PortGroup",
+      "networkCIDR": "10.10.50.0/24",
+      "gateway": "10.10.50.1",
+      "prefixLength": 24,
+      "ipPools": [
+        {
+          "name": "HCX-Uplink-Pool",
+          "startAddress": "10.10.50.10",
+          "endAddress": "10.10.50.30"
+        }
+      ],
+      "dns": {
+        "primary": "10.10.0.2",
+        "secondary": "10.10.0.3",
+        "searchDomains": ["harbor.local"]
+      },
+      "mtu": 1500,
+      "vlanId": 50,
+      "purpose": "uplink"
+    }
+  },
+  "firewallRequirements": {
+    "description": "Required ports for HCX connectivity between on-premises and AVS",
+    "ports": [
+      {
+        "port": 443,
+        "protocol": "TCP",
+        "direction": "Bidirectional",
+        "description": "HCX Manager REST API and web UI"
+      },
+      {
+        "port": 8443,
+        "protocol": "TCP",
+        "direction": "Outbound",
+        "description": "HCX bulk migration and replication traffic"
+      },
+      {
+        "port": 9443,
+        "protocol": "TCP",
+        "direction": "Outbound",
+        "description": "HCX vMotion traffic"
+      },
+      {
+        "port": 4500,
+        "protocol": "UDP",
+        "direction": "Bidirectional",
+        "description": "IPsec NAT-T for tunnel encapsulation"
+      },
+      {
+        "port": 500,
+        "protocol": "UDP",
+        "direction": "Bidirectional",
+        "description": "IPsec ISAKMP key exchange"
+      }
+    ]
+  }
+}

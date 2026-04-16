@@ -1,0 +1,106 @@
+ÔùÅ List directory harbor-retail-vmware
+  Ôöö 6 files found
+
+ÔùÅ List directory harbor-retail-vmware\scripts
+  Ôöö 2 files found
+
+ÔùÅ List directory harbor-retail-vmware\documentation
+  Ôöö 3 files found
+
+ÔùÅ Read runbook.md
+  Ôöé harbor-retail-vmware\documentation\runbook.md
+  Ôöö 113 lines read
+
+ÔùÅ List directory harbor-retail-vmware\scripts\powercli
+  Ôöö 3 files found
+
+Let me examine the existing PowerCLI scripts to match style conventions.
+
+ÔùÅ Read export-inventory.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\export-inventory.ps1
+  Ôöö 1 line read
+
+ÔùÅ Read assess-compatibility.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\assess-compatibility.ps1
+  Ôöö 1 line read
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö 1 line read
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L1:80 (80 lines read)
+
+ÔùÅ Read assess-compatibility.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\assess-compatibility.ps1
+  Ôöö L1:80 (79 lines read)
+
+ÔùÅ Read export-inventory.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\export-inventory.ps1
+  Ôöö L1:80 (79 lines read)
+
+ÔùÅ Read export-inventory.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\export-inventory.ps1
+  Ôöö L80:160 (81 lines read)
+
+ÔùÅ Read migration-runbook.ps1
+  Ôöé harbor-retail-vmware\scripts\powercli\migration-runbook.ps1
+  Ôöö L80:160 (81 lines read)
+
+ÔùÅ List directory harbor-retail-vmware\networking
+  Ôöö 4 files found
+
+Now I have a good understanding of the codebase conventions. Let me create all three files.
+
+ÔùÅ Create configure-hcx.ps1 +828
+  Ôöö harbor-retail-vmware\scripts\powercli\configure-hcx.ps1
+
+ÔùÅ Create hcx-network-profiles.json +115
+  Ôöö harbor-retail-vmware\scripts\powercli\hcx-network-profiles.json
+
+Now update the runbook with the detailed HCX Setup section.
+
+ÔùÅ Edit runbook.md +151 -5
+  Ôöö harbor-retail-vmware\documentation\runbook.md
+
+Let me verify all three files are correct:
+
+ÔùÅ Verify all created files (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution;
+  Ôöé Get-ChildItem harbor-retail-vmware\scripts\powercli\* | Select-Object
+  Ôöé Name, Length; Write-Host "---"; (Get-Content
+  Ôöé harbor-retail-vmware\scripts\powercli\hcx-network-profiles.json |
+  Ôöé ConvertFrom-Json) | Out-Null; Write-Host "JSON: Valid"; Write-Host "---"; ÔÇª
+  Ôöö 15 lines...
+
+All three files are created and valid. Now let me commit the changes:
+
+ÔùÅ Stage and verify changes (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution; git add
+  Ôöé harbor-retail-vmware/scripts/powercli/configure-hcx.ps1
+  Ôöé harbor-retail-vmware/scripts/powercli/hcx-network-profiles.json
+  Ôöé harbor-retail-vmware/documentation/runbook.md; git --no-pager diff --cached
+  Ôöé --stat
+  Ôöö 5 lines...
+
+ÔùÅ Commit HCX setup files (shell)
+  Ôöé cd C:\code\gbb\labs\appmodlab-vmware-to-azure-vmware-solution; git commit
+  Ôöé -m "Add HCX connector deployment and configuration automation
+  Ôöé
+  Ôöé - Add configure-hcx.ps1: PowerCLI script automating end-to-end HCX setup
+  Ôöé (AVS activation, OVA deployment, site pairing, network/compute profiles,ÔÇª
+  Ôöö 20 lines...
+
+Done. Here's what was created:
+
+1. **`configure-hcx.ps1`** ÔÇö Full PowerCLI automation script with 7 steps: AVS HCX activation, OVA deployment, site pairing, network profiles, compute profiles, service mesh deployment, and tunnel validation. Includes `-Simulate` mode matching existing script conventions.
+
+2. **`hcx-network-profiles.json`** ÔÇö Network profile config with management (10.10.0.0/24), vMotion (10.10.40.0/24, MTU 9000), and uplink (10.10.50.0/24) networks, including IP pools, DNS settings, and firewall port requirements.
+
+3. **`runbook.md`** ÔÇö Expanded Phase 3 with pre-requisites (ports table), automated script usage, step-by-step manual instructions for all 7 steps, and a troubleshooting table covering common issues.
+
+
+Changes   +1094 -5
+Requests  3 Premium (3m 47s)
+Tokens    Ôåæ 426.8k ÔÇó Ôåô 14.9k ÔÇó 380.8k (cached)
