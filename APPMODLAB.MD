@@ -11,7 +11,7 @@ modernizationTools: ["VMware HCX", "NSX-T", "Bicep", "Terraform"]
 agenticTools: []
 tags: ["vmware", "avs", "hcx", "nsx-t", "hybrid-cloud"]
 extensions: ["github.copilot"]
-thumbnail: ""
+thumbnail: "https://raw.githubusercontent.com/EmeaAppGbb/appmodlab-vmware-to-azure-vmware-solution/main/assets/thumbnail-gpt-image.png"
 video: ""
 version: "1.0.0"
 screenshots:
